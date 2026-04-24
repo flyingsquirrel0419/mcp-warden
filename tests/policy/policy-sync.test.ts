@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { PolicySync, PolicySignatureError } from "../../src/policy/PolicySync.js";
+import { ConfigManager } from "../../src/utils/ConfigManager.js";
 
 describe("PolicySync", () => {
   let tmpDir: string;
@@ -123,6 +124,17 @@ describe("PolicySync", () => {
       expect(() =>
         sync.syncRepo("https://github.com/org/policies.git", { verifySignature: false }),
       ).toThrow(/clone|git/i);
+    });
+  });
+
+  describe("config parsing", () => {
+    it("reads policy_sync_url without CommonJS require", () => {
+      const configPath = path.join(tmpDir, "config.yaml");
+      fs.writeFileSync(configPath, "policy_sync_url: https://example.com/org/policies.git\n");
+      vi.spyOn(ConfigManager, "getConfigFilePath").mockReturnValue(configPath);
+
+      const sync = new PolicySync(tmpDir);
+      expect(sync.getSyncUrl()).toBe("https://example.com/org/policies.git");
     });
   });
 });

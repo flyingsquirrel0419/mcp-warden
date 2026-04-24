@@ -12,34 +12,41 @@ export function registerPolicyCommand(program: Command): void {
     .option("-b, --branch <branch>", "Branch to checkout")
     .option("--list", "List available policies after syncing")
     .option("--no-verify", "Skip SSH signature verification")
-    .action(async (options: { repo: string; branch?: string; list?: boolean; verify?: boolean }) => {
-      const sync = new PolicySync();
+    .action(
+      async (options: { repo: string; branch?: string; list?: boolean; verify?: boolean }) => {
+        const sync = new PolicySync();
 
-      process.stdout.write(`Syncing policies from ${options.repo}...\n`);
+        process.stdout.write(`Syncing policies from ${options.repo}...\n`);
 
-      try {
-        sync.syncRepo(options.repo, { branch: options.branch, verifySignature: options.verify !== false });
-        process.stdout.write("Sync complete.\n");
-      } catch (err) {
-        process.stderr.write(`Sync failed: ${err instanceof Error ? err.message : String(err)}\n`);
-        process.exit(1);
-      }
-
-      if (options.list) {
-        const policies = sync.listPolicies(options.repo);
-        if (policies.length === 0) {
-          process.stdout.write("No policy files found in repository.\n");
-          return;
+        try {
+          sync.syncRepo(options.repo, {
+            branch: options.branch,
+            verifySignature: options.verify !== false,
+          });
+          process.stdout.write("Sync complete.\n");
+        } catch (err) {
+          process.stderr.write(
+            `Sync failed: ${err instanceof Error ? err.message : String(err)}\n`,
+          );
+          process.exit(1);
         }
 
-        process.stdout.write(
-          `\nFound ${policies.length} polic${policies.length !== 1 ? "ies" : "y"}:\n`,
-        );
-        for (const p of policies) {
-          process.stdout.write(`  ${p.name} — ${p.description}\n`);
+        if (options.list) {
+          const policies = sync.listPolicies(options.repo);
+          if (policies.length === 0) {
+            process.stdout.write("No policy files found in repository.\n");
+            return;
+          }
+
+          process.stdout.write(
+            `\nFound ${policies.length} polic${policies.length !== 1 ? "ies" : "y"}:\n`,
+          );
+          for (const p of policies) {
+            process.stdout.write(`  ${p.name} — ${p.description}\n`);
+          }
         }
-      }
-    });
+      },
+    );
 
   policy
     .command("list")
@@ -101,7 +108,9 @@ export function registerPolicyCommand(program: Command): void {
         process.stdout.write("No trusted signers configured.\n");
         return;
       }
-      process.stdout.write(`\n${signers.length} trusted signer${signers.length !== 1 ? "s" : ""}:\n`);
+      process.stdout.write(
+        `\n${signers.length} trusted signer${signers.length !== 1 ? "s" : ""}:\n`,
+      );
       for (const s of signers) {
         process.stdout.write(`  ${s.identity}  ${s.publicKey.slice(0, 40)}...\n`);
       }

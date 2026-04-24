@@ -12,18 +12,21 @@ export class RateLimiter {
   private counters: Map<string, number> = new Map();
   private db: {
     prepare: (sql: string) => {
-      get: (...params: unknown[]) => Record<string, unknown> | undefined;
+      get: (...params: unknown[]) => unknown;
+      all: (...params: unknown[]) => unknown[];
       run: (...params: unknown[]) => { changes: number };
     };
   } | null = null;
 
   constructor(db?: {
     prepare: (sql: string) => {
-      get: (...params: unknown[]) => Record<string, unknown> | undefined;
+      get: (...params: unknown[]) => unknown;
+      all: (...params: unknown[]) => unknown[];
       run: (...params: unknown[]) => { changes: number };
     };
   }) {
     this.db = db ?? null;
+    this.load();
   }
 
   checkAndIncrement(server: string, limits: RateLimit): RateLimitResult[] {
@@ -52,6 +55,7 @@ export class RateLimiter {
 
       if (allowed) {
         this.counters.set(key, current + 1);
+        this.persistKey(key, current + 1);
       }
     }
 
@@ -64,7 +68,9 @@ export class RateLimiter {
         // Decrement back since we're blocking overall
         const key = this.getWindowKey(server, results[i].windowType);
         const current = this.counters.get(key) ?? 1;
-        this.counters.set(key, Math.max(0, current - 1));
+        const rolledBack = Math.max(0, current - 1);
+        this.counters.set(key, rolledBack);
+        this.persistKey(key, rolledBack);
         results[i].allowed = false;
         results[i].remaining = results[i].limit - (this.counters.get(key) ?? 0);
       }
@@ -93,8 +99,24 @@ export class RateLimiter {
     if (!this.db) return;
     const rows = this.db
       .prepare("SELECT server, window_start, window_type, call_count FROM rate_limits")
-      .get() as Array<Record<string, unknown>> | undefined;
-    // Load would need .all() but we keep it simple for now
+      .all() as Array<Record<string, unknown>>;
+    for (const row of rows) {
+      const server = String(row.server);
+      const windowType = String(row.window_type);
+      const windowStart = String(row.window_start);
+      const count = Number(row.call_count);
+      this.counters.set(`${server}|${windowType}|${windowStart}`, count);
+    }
+  }
+
+  private persistKey(key: string, count: number): void {
+    if (!this.db) return;
+    const [server, type, windowStart] = key.split("|");
+    this.db
+      .prepare(
+        "INSERT OR REPLACE INTO rate_limits (server, window_start, window_type, call_count) VALUES (?, ?, ?, ?)",
+      )
+      .run(server, windowStart, type, count);
   }
 
   private getWindowKey(server: string, type: "minute" | "hour" | "day"): string {

@@ -2,6 +2,7 @@ import type { Command } from "commander";
 import fs from "node:fs";
 import path from "node:path";
 import { ConfigManager } from "../../utils/ConfigManager.js";
+import { StdioTransport } from "../../proxy/StdioTransport.js";
 
 interface McpServerConfig {
   command: string;
@@ -46,7 +47,10 @@ export function registerInitCommand(program: Command): void {
             continue;
           }
 
-          const originalCommand = [serverConfig.command, ...(serverConfig.args ?? [])].join(" ");
+          const originalCommand = StdioTransport.stringifyTarget(
+            serverConfig.command,
+            serverConfig.args ?? [],
+          );
 
           parsed.mcpServers[serverName] = {
             command: "mcp-warden",

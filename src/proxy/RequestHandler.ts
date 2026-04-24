@@ -21,6 +21,7 @@ export interface IPolicyEngine {
     reason?: string;
     matchedRule?: string;
     mode: string;
+    newTool?: boolean;
   };
   isNewTool(server: string, tool: string): boolean;
 }
@@ -134,7 +135,8 @@ export class RequestHandler {
     }
 
     // New tool notification
-    if (ctx.policyEngine.isNewTool(ctx.serverName, toolName) && ctx.notifier) {
+    const isNewTool = policyResult.newTool ?? ctx.policyEngine.isNewTool(ctx.serverName, toolName);
+    if (isNewTool && ctx.notifier) {
       ctx.notifier
         .notify({
           type: "new-tool",
@@ -207,7 +209,12 @@ export class RequestHandler {
           policy_mode: policyResult.mode,
         });
         return {
-          content: [{ type: "text" as const, text: `Blocked by Warden: upstream returned invalid response` }],
+          content: [
+            {
+              type: "text" as const,
+              text: `Blocked by Warden: upstream returned invalid response`,
+            },
+          ],
           isError: true,
         };
       }

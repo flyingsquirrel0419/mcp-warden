@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import fs from "node:fs";
 import { WardenDatabase } from "./db.js";
 import { Masker } from "./Masker.js";
 
@@ -28,6 +29,7 @@ export interface AuditQuery {
 export class AuditLogger {
   private db: WardenDatabase;
   private insertStmt: ReturnType<WardenDatabase["prepare"]> | null = null;
+  private pendingWrites = new Set<Promise<void>>();
 
   constructor(db: WardenDatabase) {
     this.db = db;
@@ -49,24 +51,40 @@ export class AuditLogger {
     const maskedInput = Masker.mask(entry.input);
     const inputJson = JSON.stringify(maskedInput);
 
-    setImmediate(() => {
-      try {
-        this.getInsertStmt().run(
-          id,
-          timestamp,
-          entry.server,
-          entry.tool,
-          inputJson,
-          entry.output_size,
-          entry.duration_ms,
-          entry.blocked ? 1 : 0,
-          entry.block_reason ?? null,
-          entry.policy_mode,
-        );
-      } catch (err) {
-        process.stderr.write(`[AuditLogger] Failed to write audit log: ${err}\n`);
-      }
+    const write = new Promise<void>((resolve) => {
+      setImmediate(() => {
+        try {
+          this.getInsertStmt().run(
+            id,
+            timestamp,
+            entry.server,
+            entry.tool,
+            inputJson,
+            entry.output_size,
+            entry.duration_ms,
+            entry.blocked ? 1 : 0,
+            entry.block_reason ?? null,
+            entry.policy_mode,
+          );
+        } catch (err) {
+          this.insertStmt = null;
+          process.stderr.write(`[AuditLogger] Failed to write audit log: ${err}\n`);
+        } finally {
+          resolve();
+        }
+      });
     });
+
+    this.pendingWrites.add(write);
+    write.finally(() => {
+      this.pendingWrites.delete(write);
+    });
+  }
+
+  async flush(): Promise<void> {
+    while (this.pendingWrites.size > 0) {
+      await Promise.allSettled([...this.pendingWrites]);
+    }
   }
 
   query(filters: AuditQuery): AuditEntry[] {
@@ -141,7 +159,7 @@ export class AuditLogger {
 
   getDbSize(): number {
     try {
-      const stat = require("node:fs").statSync(this.db.getPath());
+      const stat = fs.statSync(this.db.getPath());
       return stat.size;
     } catch {
       return 0;

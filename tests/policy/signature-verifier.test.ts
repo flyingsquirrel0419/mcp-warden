@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 
 vi.mock("node:child_process", () => {
-  const calls: Array<{ stdout?: string; stderr?: string; error?: Error & { stderr?: string } }> = [];
+  const calls: Array<{ stdout?: string; stderr?: string; error?: Error & { stderr?: string } }> =
+    [];
   const mockFn = (..._args: unknown[]) => {
     const cb = _args.find((a) => typeof a === "function") as
       | ((err: Error | null, stdout?: string, stderr?: string) => void)
@@ -70,10 +71,7 @@ describe("SignatureVerifier", () => {
   });
 
   it("returns verified:false when commit is not signed", async () => {
-    enqueue([
-      { stdout: "git version 2.40.0\n" },
-      { stdout: "\n\n" },
-    ]);
+    enqueue([{ stdout: "git version 2.40.0\n" }, { stdout: "\n\n" }]);
 
     const verifier = new SignatureVerifier("/fake/repo");
     const result = await verifier.verifyLatestCommit();

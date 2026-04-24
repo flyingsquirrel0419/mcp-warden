@@ -3,6 +3,7 @@ import {
   assessToolRisk,
   calculateRiskScore,
   formatScanResult,
+  parseCommand,
 } from "../../../src/cli/commands/scan.js";
 import type { ToolRisk, ScanResult } from "../../../src/cli/commands/scan.js";
 import { createProgram } from "../../../src/cli/index.js";
@@ -184,5 +185,14 @@ describe("CLI scan command registration", () => {
     expect(scanCmd).toBeDefined();
     const targetOpt = scanCmd!.options.find((o) => o.long === "--target");
     expect(targetOpt).toBeDefined();
+  });
+});
+
+describe("parseCommand", () => {
+  it("preserves quoted arguments with spaces", () => {
+    expect(parseCommand('node "my server.js" --flag "hello world"')).toEqual({
+      command: "node",
+      args: ["my server.js", "--flag", "hello world"],
+    });
   });
 });

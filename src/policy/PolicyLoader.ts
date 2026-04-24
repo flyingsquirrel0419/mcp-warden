@@ -116,7 +116,10 @@ export class PolicyLoader {
     let inCharClass = false;
     for (let i = 0; i < pattern.length; i++) {
       const ch = pattern[i];
-      if (ch === "\\" && i + 1 < pattern.length) { i++; continue; }
+      if (ch === "\\" && i + 1 < pattern.length) {
+        i++;
+        continue;
+      }
       if (ch === "[") inCharClass = true;
       if (ch === "]") inCharClass = false;
       if (ch === "|" && !inCharClass) alternationCount++;
@@ -133,7 +136,10 @@ export class PolicyLoader {
     let depth = 0;
     for (let i = 0; i < pattern.length; i++) {
       const ch = pattern[i];
-      if (ch === "\\" && i + 1 < pattern.length) { i++; continue; }
+      if (ch === "\\" && i + 1 < pattern.length) {
+        i++;
+        continue;
+      }
       if (ch === "(") {
         depth++;
         // Peek ahead to see if this group contains a quantifier before closing
@@ -141,9 +147,15 @@ export class PolicyLoader {
         let groupDepth = 1;
         for (let j = i + 1; j < pattern.length && groupDepth > 0; j++) {
           const gc = pattern[j];
-          if (gc === "\\" && j + 1 < pattern.length) { j++; continue; }
+          if (gc === "\\" && j + 1 < pattern.length) {
+            j++;
+            continue;
+          }
           if (gc === "(") groupDepth++;
-          if (gc === ")") { groupDepth--; continue; }
+          if (gc === ")") {
+            groupDepth--;
+            continue;
+          }
           if ((gc === "+" || gc === "*" || gc === "{") && groupDepth === 1) {
             groupHasQuantifier = true;
           }
@@ -163,9 +175,9 @@ export class PolicyLoader {
     // - Nested quantifiers like (a+)+ or (a*)*
     // - Alternation with overlapping quantifiers like (a|a)+
     const dangerousPatterns = [
-      /\([^)]*[+*{][^)]*\)[+*{]/,     // nested quantifiers: (a+)+
-      /\([^)]*\|[^)]*\)[+*{]/,        // alternation with quantifier: (a|b)+
-      /\(\?:[^)]*[+*{][^)]*\)[+*{]/,  // non-capturing nested: (?:a+)+
+      /\([^)]*[+*{][^)]*\)[+*{]/, // nested quantifiers: (a+)+
+      /\([^)]*\|[^)]*\)[+*{]/, // alternation with quantifier: (a|b)+
+      /\(\?:[^)]*[+*{][^)]*\)[+*{]/, // non-capturing nested: (?:a+)+
     ];
 
     for (const dangerous of dangerousPatterns) {

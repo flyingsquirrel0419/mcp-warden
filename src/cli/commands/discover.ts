@@ -2,6 +2,7 @@ import type { Command } from "commander";
 import fs from "node:fs";
 import path from "node:path";
 import { ConfigManager } from "../../utils/ConfigManager.js";
+import { StdioTransport } from "../../proxy/StdioTransport.js";
 
 interface McpServerConfig {
   command: string;
@@ -100,7 +101,7 @@ export function registerDiscoverCommand(program: Command): void {
           const icon = server.alreadyWrapped ? "🛡️ " : "  ";
           const command = server.config.url
             ? server.config.url
-            : [server.config.command, ...(server.config.args ?? [])].join(" ");
+            : StdioTransport.stringifyTarget(server.config.command, server.config.args ?? []);
           const suffix = server.alreadyWrapped ? " (already wrapped)" : "";
           process.stdout.write(`  ${icon}${server.name}: ${command}${suffix}\n`);
         }
@@ -131,7 +132,7 @@ export function registerDiscoverCommand(program: Command): void {
 
             const originalCommand = entry.url
               ? entry.url
-              : [entry.command, ...(entry.args ?? [])].join(" ");
+              : StdioTransport.stringifyTarget(entry.command, entry.args ?? []);
 
             parsed.mcpServers[server.name] = {
               command: "mcp-warden",

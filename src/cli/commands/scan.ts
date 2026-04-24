@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { StdioTransport } from "../../proxy/StdioTransport.js";
 
 export interface ToolRisk {
   name: string;
@@ -159,11 +160,11 @@ export function formatScanResult(result: ScanResult): string {
   return lines.join("\n");
 }
 
-function parseCommand(target: string): { command: string; args: string[] } {
-  const parts = target.split(/\s+/);
+export function parseCommand(target: string): { command: string; args: string[] } {
+  const parsed = StdioTransport.parseTarget(target);
   return {
-    command: parts[0],
-    args: parts.slice(1),
+    command: parsed.command,
+    args: parsed.args,
   };
 }
 

@@ -1,4 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { WardenDatabase } from "../../src/audit/db.js";
 import { RateLimiter } from "../../src/policy/RateLimiter.js";
 
 describe("RateLimiter", () => {
@@ -69,5 +73,32 @@ describe("RateLimiter", () => {
     }
     expect(allowed).toBe(50);
     expect(blocked).toBe(50);
+  });
+
+  describe("database persistence", () => {
+    let tempDir: string;
+    let db: WardenDatabase;
+
+    beforeEach(() => {
+      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "warden-rate-limit-"));
+      db = new WardenDatabase(path.join(tempDir, "test.db"));
+      db.open();
+    });
+
+    afterEach(() => {
+      db.close();
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    });
+
+    it("persists counters across RateLimiter instances", () => {
+      const first = new RateLimiter(db);
+      first.checkAndIncrement("notion", { per_minute: 1 });
+
+      const second = new RateLimiter(db);
+      const results = second.checkAndIncrement("notion", { per_minute: 1 });
+
+      expect(results[0].allowed).toBe(false);
+      expect(results[0].remaining).toBe(0);
+    });
   });
 });

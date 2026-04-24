@@ -82,6 +82,30 @@ describe("init command", () => {
     expect(getOutput()).toContain("Wrapped 2 servers");
   });
 
+  it("quotes wrapped target args that contain spaces", async () => {
+    writeCfg("config.json", {
+      mcpServers: {
+        local: { command: "node", args: ["my server.js", "--label", "hello world"] },
+      },
+    });
+
+    vi.spyOn(ConfigManager, "findMcpConfigs").mockReturnValue([
+      { path: cfgPath("config.json"), type: "claude-desktop" as const },
+    ]);
+
+    await makeProgram().parseAsync(["node", "mcp-warden", "init"]);
+
+    const modified = readCfg("config.json");
+    const servers = modified.mcpServers as Record<string, { command: string; args: string[] }>;
+    expect(servers.local.args).toEqual([
+      "proxy",
+      "--target",
+      'node "my server.js" --label "hello world"',
+      "--name",
+      "local",
+    ]);
+  });
+
   it("skips already-wrapped servers", async () => {
     writeCfg("config.json", {
       mcpServers: {

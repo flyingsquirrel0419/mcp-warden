@@ -16,6 +16,10 @@ import { NotificationRelay } from "./NotificationRelay.js";
 import { StdioTransport } from "./StdioTransport.js";
 import { HttpTransport } from "./HttpTransport.js";
 import { ProxyError } from "../utils/errors.js";
+import { InjectionDetector } from "../security/InjectionDetector.js";
+import { SsrfGuard } from "../security/SsrfGuard.js";
+import { DataLeakDetector } from "../security/DataLeakDetector.js";
+import { Notifier } from "../daemon/Notifier.js";
 
 export interface ProxyConfig {
   target: string;
@@ -60,7 +64,7 @@ export class McpProxy {
       policy = PolicyLoader.defaultPolicy();
       this.logger.info("Using default policy (audit-only)");
     }
-    const rateLimiter = new RateLimiter();
+    const rateLimiter = new RateLimiter(this.db);
     this.policyEngine = new PolicyEngine(policy, rateLimiter);
 
     // 4. Create Client + Transport (connect to upstream)
@@ -109,6 +113,10 @@ export class McpProxy {
       auditLogger: this.auditLogger,
       capabilities,
       requestTimeout: isHttp ? 30000 : StdioTransport.parseTarget(this.config.target).timeout,
+      injectionDetector: new InjectionDetector(),
+      ssrfGuard: new SsrfGuard(),
+      dataLeakDetector: new DataLeakDetector(),
+      notifier: new Notifier({ channels: ["log"], minSeverity: "info" }),
     });
 
     // 9. Connect server to stdio (AI client talks to us)
@@ -123,7 +131,7 @@ export class McpProxy {
   }
 
   async stop(): Promise<void> {
-    this.cleanup();
+    await this.cleanup();
   }
 
   private watchPolicyFile(policyPath: string): void {
@@ -147,10 +155,13 @@ export class McpProxy {
     }
   }
 
-  private cleanup(): void {
+  private async cleanup(): Promise<void> {
     if (this.fsWatcher) {
       this.fsWatcher.close();
       this.fsWatcher = null;
+    }
+    if (this.auditLogger) {
+      await this.auditLogger.flush();
     }
     if (this.db) {
       this.db.close();
@@ -171,8 +182,8 @@ export async function startProxy(
     watchPolicy: options?.watchPolicy,
   });
 
-  const cleanup = () => {
-    proxy.stop();
+  const cleanup = async () => {
+    await proxy.stop();
     process.exit(0);
   };
   process.on("SIGINT", cleanup);

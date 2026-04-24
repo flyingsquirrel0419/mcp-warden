@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
@@ -24,9 +24,6 @@ describe("AuditLogger", () => {
     fs.rmSync(tempDir, { recursive: true, force: true });
   });
 
-  // Helper to wait for async log writes
-  const flush = () => new Promise<void>((resolve) => setImmediate(() => setImmediate(resolve)));
-
   it("creates an entry in the database", async () => {
     logger.log({
       server: "notion",
@@ -37,7 +34,7 @@ describe("AuditLogger", () => {
       blocked: false,
       policy_mode: "audit-only",
     });
-    await flush();
+    await logger.flush();
     const entries = logger.getRecent(10);
     expect(entries).toHaveLength(1);
     expect(entries[0].server).toBe("notion");
@@ -54,7 +51,7 @@ describe("AuditLogger", () => {
       blocked: false,
       policy_mode: "passthrough",
     });
-    await flush();
+    await logger.flush();
     const entry = logger.getRecent(1)[0];
     expect(entry.id).toMatch(/^[0-9a-f-]{36}$/);
     expect(entry.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
@@ -70,13 +67,14 @@ describe("AuditLogger", () => {
       blocked: false,
       policy_mode: "passthrough",
     });
-    await flush();
+    await logger.flush();
     const entry = logger.getRecent(1)[0];
     expect(entry.input.api_key).toBe("***REDACTED***");
     expect(entry.input.name).toBe("ok");
   });
 
   it("does not throw on DB write failure", async () => {
+    const stderrSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
     db.close();
     expect(() =>
       logger.log({
@@ -89,7 +87,28 @@ describe("AuditLogger", () => {
         policy_mode: "passthrough",
       }),
     ).not.toThrow();
-    await flush();
+    await logger.flush();
+    expect(stderrSpy).toHaveBeenCalledWith(expect.stringContaining("Failed to write audit log"));
+    stderrSpy.mockRestore();
+  });
+
+  it("flushes pending writes before the database is closed", async () => {
+    logger.log({
+      server: "test",
+      tool: "before_close",
+      input: {},
+      output_size: 0,
+      duration_ms: 0,
+      blocked: false,
+      policy_mode: "audit-only",
+    });
+
+    await logger.flush();
+    db.close();
+    db.open();
+
+    const entries = logger.query({ tool: "before_close" });
+    expect(entries).toHaveLength(1);
   });
 
   it("queries with no filters", async () => {
@@ -104,7 +123,7 @@ describe("AuditLogger", () => {
         policy_mode: "passthrough",
       });
     }
-    await flush();
+    await logger.flush();
     const entries = logger.query({});
     expect(entries).toHaveLength(3);
   });
@@ -128,7 +147,7 @@ describe("AuditLogger", () => {
       blocked: false,
       policy_mode: "p",
     });
-    await flush();
+    await logger.flush();
     const entries = logger.query({ server: "notion" });
     expect(entries).toHaveLength(1);
     expect(entries[0].server).toBe("notion");
@@ -144,7 +163,7 @@ describe("AuditLogger", () => {
       blocked: false,
       policy_mode: "p",
     });
-    await flush();
+    await logger.flush();
     const entries = logger.query({ from: "2000-01-01", to: "2099-12-31" });
     expect(entries).toHaveLength(1);
   });
@@ -161,7 +180,7 @@ describe("AuditLogger", () => {
         policy_mode: "p",
       });
     }
-    await flush();
+    await logger.flush();
     const page1 = logger.query({ limit: 2, offset: 0 });
     const page2 = logger.query({ limit: 2, offset: 2 });
     expect(page1).toHaveLength(2);
@@ -180,7 +199,7 @@ describe("AuditLogger", () => {
         policy_mode: "p",
       });
     }
-    await flush();
+    await logger.flush();
     const entries = logger.getRecent(3);
     expect(entries).toHaveLength(3);
   });
@@ -205,7 +224,7 @@ describe("AuditLogger", () => {
       block_reason: "not allowed",
       policy_mode: "p",
     });
-    await flush();
+    await logger.flush();
     const summary = logger.getServerSummary("notion");
     expect(summary.total).toBe(2);
     expect(summary.blocked).toBe(1);
@@ -241,7 +260,7 @@ describe("AuditLogger", () => {
       blocked: false,
       policy_mode: "p",
     });
-    await flush();
+    await logger.flush();
     const stats = logger.getToolStats("test");
     expect(stats).toHaveLength(2);
     const toolA = stats.find((s) => s.tool === "a");
@@ -259,7 +278,7 @@ describe("AuditLogger", () => {
       blocked: false,
       policy_mode: "p",
     });
-    await flush();
+    await logger.flush();
     const deleted = logger.purgeOlderThan(0);
     expect(deleted).toBe(1);
     expect(logger.getRecent(10)).toHaveLength(0);
@@ -277,9 +296,7 @@ describe("AuditLogger", () => {
         policy_mode: "p",
       });
     }
-    await flush();
-    // Give extra time for all setImmediate callbacks
-    await new Promise((r) => setTimeout(r, 100));
+    await logger.flush();
     const entries = logger.query({ limit: 200 });
     expect(entries).toHaveLength(100);
   });

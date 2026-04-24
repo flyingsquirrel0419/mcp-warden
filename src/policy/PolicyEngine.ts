@@ -12,6 +12,7 @@ export interface PolicyResult {
   matchedRule?: string;
   mode: "passthrough" | "audit-only" | "enforcing";
   rateLimitInfo?: { limit: number; remaining: number; resetAt: string };
+  newTool?: boolean;
 }
 
 export interface PolicyEvaluationRequest {
@@ -37,7 +38,7 @@ export class PolicyEngine {
 
     // 1. Passthrough mode: always allowed
     if (mode === "passthrough") {
-      return { allowed: true, mode: "passthrough" };
+      return { allowed: true, mode: "passthrough", newTool: isNew };
     }
 
     // 2. Rate limits (enforced in ALL modes)
@@ -66,6 +67,7 @@ export class PolicyEngine {
         reason: ruleResult.message ?? `Rule "${ruleResult.name}" triggered`,
         matchedRule: ruleResult.name,
         mode,
+        newTool: isNew,
       };
     }
 
@@ -80,6 +82,7 @@ export class PolicyEngine {
       allowed: true,
       reason,
       mode,
+      newTool: isNew,
     };
   }
 

@@ -26,8 +26,10 @@ export class SignatureVerifier {
 
     try {
       const { stdout: formatOut } = await execFileAsync("git", [
-        "-C", this.repoPath,
-        "log", "-1",
+        "-C",
+        this.repoPath,
+        "log",
+        "-1",
         "--format=%GS%n%GF",
         "HEAD",
       ]);
@@ -46,17 +48,18 @@ export class SignatureVerifier {
       const signersPath = TrustedSigners.getSignersPath();
 
       try {
-        const { stdout: verifyOut, stderr: verifyErr } = await execFileAsync("git", [
-          "-C", this.repoPath,
-          "verify-commit", "HEAD",
-        ], {
-          env: {
-            ...process.env,
-            GIT_CONFIG_COUNT: "1",
-            GIT_CONFIG_KEY_0: "gpg.ssh.allowedSignersFile",
-            GIT_CONFIG_VALUE_0: signersPath,
+        const { stdout: verifyOut, stderr: verifyErr } = await execFileAsync(
+          "git",
+          ["-C", this.repoPath, "verify-commit", "HEAD"],
+          {
+            env: {
+              ...process.env,
+              GIT_CONFIG_COUNT: "1",
+              GIT_CONFIG_KEY_0: "gpg.ssh.allowedSignersFile",
+              GIT_CONFIG_VALUE_0: signersPath,
+            },
           },
-        });
+        );
 
         const output = verifyOut + verifyErr;
         if (output.includes("Good")) {
@@ -102,7 +105,9 @@ export class SignatureVerifier {
     for (let i = 0; i < 3; i++) {
       if ((current[i] ?? 0) > (required[i] ?? 0)) return;
       if ((current[i] ?? 0) < (required[i] ?? 0))
-        throw new Error(`git >= ${minVersion} required for SSH signature verification (have ${match[1]})`);
+        throw new Error(
+          `git >= ${minVersion} required for SSH signature verification (have ${match[1]})`,
+        );
     }
   }
 }

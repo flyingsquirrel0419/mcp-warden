@@ -28,8 +28,15 @@ const DEFAULT_CONFIG: WardenConfig = {
 
 export class ConfigManager {
   private static readonly ALLOWED_KEYS: ReadonlySet<string> = new Set([
-    "log_level", "proxy_timeout_ms", "dashboard_port", "max_response_bytes",
-    "log_retention_days", "db_max_size_mb", "policy_path", "db_path", "policy_sync_url",
+    "log_level",
+    "proxy_timeout_ms",
+    "dashboard_port",
+    "max_response_bytes",
+    "log_retention_days",
+    "db_max_size_mb",
+    "policy_path",
+    "db_path",
+    "policy_sync_url",
   ]);
 
   private config: WardenConfig;
@@ -103,14 +110,20 @@ export class ConfigManager {
         filtered[key] = value;
       }
     }
-    if (typeof filtered.policy_path === "string" && !ConfigManager.isSafeConfigPath(filtered.policy_path)) {
-      throw new ConfigError("policy_path must be within ~/.mcp-warden/", filtered.policy_path as string);
+    if (
+      typeof filtered.policy_path === "string" &&
+      !ConfigManager.isSafeConfigPath(filtered.policy_path)
+    ) {
+      throw new ConfigError(
+        "policy_path must be within ~/.mcp-warden/",
+        filtered.policy_path as string,
+      );
     }
     if (typeof filtered.db_path === "string" && !ConfigManager.isSafeConfigPath(filtered.db_path)) {
       throw new ConfigError("db_path must be within ~/.mcp-warden/", filtered.db_path as string);
     }
     ConfigManager.ensureConfigDir();
-    this.config = { ...this.config, ...filtered as Partial<WardenConfig> };
+    this.config = { ...this.config, ...(filtered as Partial<WardenConfig>) };
     const content = YAML.stringify(this.config);
     fs.writeFileSync(this.configPath, content, "utf-8");
   }

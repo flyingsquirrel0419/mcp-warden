@@ -2,9 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { execFileSync } from "node:child_process";
+import YAML from "yaml";
 import { ConfigManager } from "../utils/ConfigManager.js";
 import { PolicyLoader } from "./PolicyLoader.js";
-import { SignatureVerifier } from "./SignatureVerifier.js";
 
 export class PolicySignatureError extends Error {
   constructor(message: string) {
@@ -27,10 +27,7 @@ export class PolicySync {
     this.cacheDir = cacheDir ?? path.join(os.homedir(), ".mcp-warden", "policy-cache");
   }
 
-  syncRepo(
-    repoUrl: string,
-    options?: { branch?: string; verifySignature?: boolean },
-  ): string {
+  syncRepo(repoUrl: string, options?: { branch?: string; verifySignature?: boolean }): string {
     const branch = options?.branch;
     const verify = options?.verifySignature ?? true;
     const repoName = this.repoDirName(repoUrl);
@@ -50,7 +47,11 @@ export class PolicySync {
           cwd: localPath,
           stdio: "pipe",
         });
-        execFileSync("git", ["merge", "--ff-only", "FETCH_HEAD"], { cwd: localPath, stdio: "pipe", timeout: 15000 });
+        execFileSync("git", ["merge", "--ff-only", "FETCH_HEAD"], {
+          cwd: localPath,
+          stdio: "pipe",
+          timeout: 15000,
+        });
       } catch {
         // Pull failed — force fresh clone
         fs.rmSync(localPath, { recursive: true, force: true });
@@ -135,7 +136,6 @@ export class PolicySync {
     if (!fs.existsSync(configPath)) return null;
 
     const content = fs.readFileSync(configPath, "utf-8");
-    const YAML = require("yaml");
     const config = YAML.parse(content) as Record<string, unknown>;
     return (config.policy_sync_url as string) ?? null;
   }
@@ -148,10 +148,14 @@ export class PolicySync {
 
   private verifySync(repoPath: string): void {
     try {
-      const signerInfo = execFileSync("git", ["-C", repoPath, "log", "-1", "--format=%GS", "HEAD"], {
-        encoding: "utf-8",
-        stdio: ["pipe", "pipe", "pipe"],
-      }).trim();
+      const signerInfo = execFileSync(
+        "git",
+        ["-C", repoPath, "log", "-1", "--format=%GS", "HEAD"],
+        {
+          encoding: "utf-8",
+          stdio: ["pipe", "pipe", "pipe"],
+        },
+      ).trim();
 
       if (!signerInfo) {
         throw new PolicySignatureError(
@@ -187,7 +191,7 @@ export class PolicySync {
         const stderr =
           typeof (err as { stderr?: unknown }).stderr === "string"
             ? ((err as { stderr: string }).stderr as string)
-            : (err as { stderr?: Buffer })?.stderr?.toString() ?? "";
+            : ((err as { stderr?: Buffer })?.stderr?.toString() ?? "");
         if (!stderr.includes("Good")) {
           throw new PolicySignatureError(
             `Signature verification failed.\n` +
@@ -199,9 +203,7 @@ export class PolicySync {
       }
     } catch (err) {
       if (err instanceof PolicySignatureError) throw err;
-      throw new PolicySignatureError(
-        `Signature verification error: ${(err as Error).message}`,
-      );
+      throw new PolicySignatureError(`Signature verification error: ${(err as Error).message}`);
     }
   }
 
@@ -220,7 +222,6 @@ export class PolicySync {
     let description = "Community policy";
 
     try {
-      const YAML = require("yaml");
       const parsed = YAML.parse(content) as Record<string, unknown>;
       if (parsed.name && typeof parsed.name === "string") name = parsed.name;
       if (parsed.description && typeof parsed.description === "string")

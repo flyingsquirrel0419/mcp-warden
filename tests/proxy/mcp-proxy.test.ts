@@ -3,6 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { McpProxy, type ProxyConfig } from "../../src/proxy/McpProxy.js";
+import { RequestHandler } from "../../src/proxy/RequestHandler.js";
+import { SsrfGuard } from "../../src/security/SsrfGuard.js";
+import { InjectionDetector } from "../../src/security/InjectionDetector.js";
+import { DataLeakDetector } from "../../src/security/DataLeakDetector.js";
 
 vi.mock("@modelcontextprotocol/sdk/server/index.js", () => ({
   Server: vi.fn(function MockServer() {
@@ -71,6 +75,7 @@ describe("McpProxy", () => {
   });
 
   it("start() initializes all components", async () => {
+    const registerSpy = vi.spyOn(RequestHandler, "registerHandlers");
     const proxy = new McpProxy({
       target: "echo hello",
       serverName: "test",
@@ -80,7 +85,11 @@ describe("McpProxy", () => {
     fs.writeFileSync(path.join(tempDir, "policy.yaml"), "version: 1\n");
 
     await proxy.start();
-    expect(true).toBe(true);
+    const ctx = registerSpy.mock.calls[0][0];
+    expect(ctx.ssrfGuard).toBeInstanceOf(SsrfGuard);
+    expect(ctx.injectionDetector).toBeInstanceOf(InjectionDetector);
+    expect(ctx.dataLeakDetector).toBeInstanceOf(DataLeakDetector);
+    expect(ctx.notifier).toBeDefined();
     await proxy.stop();
   });
 
