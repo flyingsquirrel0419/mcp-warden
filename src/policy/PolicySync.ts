@@ -4,6 +4,14 @@ import os from "node:os";
 import { execSync } from "node:child_process";
 import { ConfigManager } from "../utils/ConfigManager.js";
 import { PolicyLoader } from "./PolicyLoader.js";
+import { SignatureVerifier } from "./SignatureVerifier.js";
+
+export class PolicySignatureError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PolicySignatureError";
+  }
+}
 
 export interface RemotePolicy {
   name: string;
@@ -19,7 +27,12 @@ export class PolicySync {
     this.cacheDir = cacheDir ?? path.join(os.homedir(), ".mcp-warden", "policy-cache");
   }
 
-  syncRepo(repoUrl: string, branch?: string): string {
+  syncRepo(
+    repoUrl: string,
+    options?: { branch?: string; verifySignature?: boolean },
+  ): string {
+    const branch = options?.branch;
+    const verify = options?.verifySignature ?? true;
     const repoName = this.repoDirName(repoUrl);
     const localPath = path.join(this.cacheDir, repoName);
 
@@ -32,7 +45,13 @@ export class PolicySync {
       });
     } else {
       try {
-        execSync("git pull --ff-only", { cwd: localPath, stdio: "pipe", timeout: 15000 });
+        // Fast-forward only to prevent history rewrite attacks
+        execSync("git fetch origin", { cwd: localPath, stdio: "pipe", timeout: 15000 });
+        execSync("git merge-base --is-ancestor HEAD FETCH_HEAD", {
+          cwd: localPath,
+          stdio: "pipe",
+        });
+        execSync("git merge --ff-only FETCH_HEAD", { cwd: localPath, stdio: "pipe", timeout: 15000 });
       } catch {
         // Pull failed — force fresh clone
         fs.rmSync(localPath, { recursive: true, force: true });
@@ -42,6 +61,10 @@ export class PolicySync {
           timeout: 30000,
         });
       }
+    }
+
+    if (verify) {
+      this.verifySync(localPath);
     }
 
     return localPath;
@@ -110,6 +133,65 @@ export class PolicySync {
     const configManager = new ConfigManager();
     configManager.load();
     configManager.save({ policy_sync_url: url } as never);
+  }
+
+  private verifySync(repoPath: string): void {
+    try {
+      const signerInfo = execSync(
+        `git -C "${repoPath}" log -1 --format=%GS HEAD`,
+        { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] },
+      ).trim();
+
+      if (!signerInfo) {
+        throw new PolicySignatureError(
+          `Refusing to apply unverified policy.\n` +
+            `Reason: Commit is not signed. SSH-signed commits are required.\n\n` +
+            `To trust a signer, run:\n` +
+            `  mcp-warden policy trust-key --identity user@example.com --key "ssh-ed25519 AAAA..."\n` +
+            `To skip verification, pass --no-verify.`,
+        );
+      }
+
+      const signersPath = path.join(os.homedir(), ".mcp-warden", "allowed_signers");
+      if (!fs.existsSync(signersPath)) {
+        throw new PolicySignatureError(
+          `No trusted signers configured.\n` +
+            `Create ~/.mcp-warden/allowed_signers or run:\n` +
+            `  mcp-warden policy trust-key --identity user@example.com --key "ssh-ed25519 AAAA..."`,
+        );
+      }
+
+      try {
+        execSync(`git -C "${repoPath}" verify-commit HEAD`, {
+          encoding: "utf-8",
+          stdio: ["pipe", "pipe", "pipe"],
+          env: {
+            ...process.env,
+            GIT_CONFIG_COUNT: "1",
+            GIT_CONFIG_KEY_0: "gpg.ssh.allowedSignersFile",
+            GIT_CONFIG_VALUE_0: signersPath,
+          },
+        });
+      } catch (err: unknown) {
+        const stderr =
+          typeof (err as { stderr?: unknown }).stderr === "string"
+            ? ((err as { stderr: string }).stderr as string)
+            : (err as { stderr?: Buffer })?.stderr?.toString() ?? "";
+        if (!stderr.includes("Good")) {
+          throw new PolicySignatureError(
+            `Signature verification failed.\n` +
+              `Reason: ${stderr.slice(0, 200) || "Signer not in trusted list"}\n\n` +
+              `To trust a signer, run:\n` +
+              `  mcp-warden policy trust-key --identity user@example.com --key "ssh-ed25519 AAAA..."`,
+          );
+        }
+      }
+    } catch (err) {
+      if (err instanceof PolicySignatureError) throw err;
+      throw new PolicySignatureError(
+        `Signature verification error: ${(err as Error).message}`,
+      );
+    }
   }
 
   private repoDirName(repoUrl: string): string {

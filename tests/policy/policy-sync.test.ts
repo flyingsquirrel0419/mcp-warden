@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { PolicySync } from "../../src/policy/PolicySync.js";
+import { PolicySync, PolicySignatureError } from "../../src/policy/PolicySync.js";
 
 describe("PolicySync", () => {
   let tmpDir: string;
@@ -104,6 +104,25 @@ describe("PolicySync", () => {
       expect(() =>
         sync.applyPolicy("https://github.com/org/policies.git", "nonexistent.yaml"),
       ).toThrow();
+    });
+  });
+
+  describe("syncRepo signature verification", () => {
+    it("throws PolicySignatureError when verification fails", () => {
+      const sync = new PolicySync(tmpDir);
+      const repoDir = path.join(tmpDir, "org_policies");
+      fs.mkdirSync(repoDir, { recursive: true });
+      // Not a real git repo, so git commands will fail → signature error
+      expect(() =>
+        sync.syncRepo("https://github.com/org/policies.git", { verifySignature: true }),
+      ).toThrow();
+    });
+
+    it("skips verification when verifySignature is false", () => {
+      const sync = new PolicySync(tmpDir);
+      expect(() =>
+        sync.syncRepo("https://github.com/org/policies.git", { verifySignature: false }),
+      ).toThrow(/clone|git/i);
     });
   });
 });

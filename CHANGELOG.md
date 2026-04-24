@@ -12,6 +12,7 @@ This project follows a simple changelog format inspired by Keep a Changelog. Ver
 - **ReDoS protection added**: policy YAML regex patterns are validated before compilation. Patterns exceeding 200 characters or containing nested quantifiers (e.g. `(a+)+`) are rejected.
 - **Masker no longer leaks secret prefixes**: `maskString()` replaced raw 8-char prefix with a named token type label (e.g. `[anthropic-key]***REDACTED***`).
 - **Dashboard localhost-only middleware**: non-local requests are now rejected with `403` by default.
+- **Policy sync SSH signature verification**: policy repos are now verified against SSH-signed commits before applying. New `trust-key` and `list-keys` CLI commands for managing trusted signers. Fast-forward-only pulls prevent history rewrite attacks.
 
 ### Changed
 
