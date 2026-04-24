@@ -31,9 +31,7 @@ export class WardenDatabase {
     if (this.db) return;
 
     const dir = path.dirname(this.dbPath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
+    fs.mkdirSync(dir, { recursive: true });
 
     this.db = new Database(this.dbPath);
     this.configurePragmas();

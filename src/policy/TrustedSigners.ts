@@ -17,6 +17,10 @@ export class TrustedSigners {
   static load(): TrustedSigner[] {
     const signersPath = TrustedSigners.getSignersPath();
     if (!fs.existsSync(signersPath)) return [];
+    const stat = fs.lstatSync(signersPath);
+    if (stat.isSymbolicLink()) {
+      throw new Error(`Refusing to read symlink: ${signersPath}`);
+    }
     return fs
       .readFileSync(signersPath, "utf-8")
       .split("\n")
@@ -31,8 +35,17 @@ export class TrustedSigners {
   }
 
   static add(identity: string, publicKey: string): void {
+    if (publicKey.includes("\n") || publicKey.includes("\r")) {
+      throw new Error("Public key must not contain newlines");
+    }
     fs.mkdirSync(SIGNERS_DIR, { recursive: true });
     const signersPath = TrustedSigners.getSignersPath();
+    if (fs.existsSync(signersPath)) {
+      const stat = fs.lstatSync(signersPath);
+      if (stat.isSymbolicLink()) {
+        throw new Error(`Refusing to write to symlink: ${signersPath}`);
+      }
+    }
     const line = `${identity} ${publicKey}\n`;
     fs.appendFileSync(signersPath, line);
   }

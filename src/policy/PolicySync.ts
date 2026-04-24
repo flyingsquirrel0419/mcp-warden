@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { ConfigManager } from "../utils/ConfigManager.js";
 import { PolicyLoader } from "./PolicyLoader.js";
 import { SignatureVerifier } from "./SignatureVerifier.js";
@@ -38,25 +38,26 @@ export class PolicySync {
 
     if (!fs.existsSync(localPath)) {
       fs.mkdirSync(this.cacheDir, { recursive: true });
-      const branchArg = branch ? ` --branch ${branch}` : "";
-      execSync(`git clone --depth 1${branchArg} ${repoUrl} ${localPath}`, {
-        stdio: "pipe",
-        timeout: 30000,
-      });
+      const cloneArgs = ["clone", "--depth", "1"];
+      if (branch) cloneArgs.push("--branch", branch);
+      cloneArgs.push(repoUrl, localPath);
+      execFileSync("git", cloneArgs, { stdio: "pipe", timeout: 30000 });
     } else {
       try {
         // Fast-forward only to prevent history rewrite attacks
-        execSync("git fetch origin", { cwd: localPath, stdio: "pipe", timeout: 15000 });
-        execSync("git merge-base --is-ancestor HEAD FETCH_HEAD", {
+        execFileSync("git", ["fetch", "origin"], { cwd: localPath, stdio: "pipe", timeout: 15000 });
+        execFileSync("git", ["merge-base", "--is-ancestor", "HEAD", "FETCH_HEAD"], {
           cwd: localPath,
           stdio: "pipe",
         });
-        execSync("git merge --ff-only FETCH_HEAD", { cwd: localPath, stdio: "pipe", timeout: 15000 });
+        execFileSync("git", ["merge", "--ff-only", "FETCH_HEAD"], { cwd: localPath, stdio: "pipe", timeout: 15000 });
       } catch {
         // Pull failed — force fresh clone
         fs.rmSync(localPath, { recursive: true, force: true });
-        const branchArg = branch ? ` --branch ${branch}` : "";
-        execSync(`git clone --depth 1${branchArg} ${repoUrl} ${localPath}`, {
+        const retryArgs = ["clone", "--depth", "1"];
+        if (branch) retryArgs.push("--branch", branch);
+        retryArgs.push(repoUrl, localPath);
+        execFileSync("git", retryArgs, {
           stdio: "pipe",
           timeout: 30000,
         });
@@ -100,6 +101,12 @@ export class PolicySync {
       throw new Error(`Policy file not found: ${policyFileName}`);
     }
 
+    if (fs.existsSync(filePath)) {
+      const stat = fs.lstatSync(filePath);
+      if (stat.isSymbolicLink()) {
+        throw new Error(`Refusing to read symlink: ${filePath}`);
+      }
+    }
     const content = fs.readFileSync(filePath, "utf-8");
 
     // Validate before applying
@@ -110,6 +117,10 @@ export class PolicySync {
     ConfigManager.ensureConfigDir();
 
     if (fs.existsSync(policyPath)) {
+      const stat = fs.lstatSync(policyPath);
+      if (stat.isSymbolicLink()) {
+        throw new Error(`Refusing to overwrite symlink: ${policyPath}`);
+      }
       const backupPath = policyPath + ".backup";
       fs.copyFileSync(policyPath, backupPath);
     }
@@ -137,10 +148,10 @@ export class PolicySync {
 
   private verifySync(repoPath: string): void {
     try {
-      const signerInfo = execSync(
-        `git -C "${repoPath}" log -1 --format=%GS HEAD`,
-        { encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] },
-      ).trim();
+      const signerInfo = execFileSync("git", ["-C", repoPath, "log", "-1", "--format=%GS", "HEAD"], {
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "pipe"],
+      }).trim();
 
       if (!signerInfo) {
         throw new PolicySignatureError(
@@ -162,7 +173,7 @@ export class PolicySync {
       }
 
       try {
-        execSync(`git -C "${repoPath}" verify-commit HEAD`, {
+        execFileSync("git", ["-C", repoPath, "verify-commit", "HEAD"], {
           encoding: "utf-8",
           stdio: ["pipe", "pipe", "pipe"],
           env: {

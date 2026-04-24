@@ -28,6 +28,12 @@ export interface CompiledPolicy {
 export class PolicyLoader {
   static loadFromFile(filePath: string): CompiledPolicy {
     try {
+      if (fs.existsSync(filePath)) {
+        const stat = fs.lstatSync(filePath);
+        if (stat.isSymbolicLink()) {
+          throw new Error(`Refusing to read symlink: ${filePath}`);
+        }
+      }
       const content = fs.readFileSync(filePath, "utf-8");
       return PolicyLoader.loadFromString(content);
     } catch (err) {
@@ -101,6 +107,54 @@ export class PolicyLoader {
     if (pattern.length > 200) {
       throw new ConfigError(
         `Regex pattern too long (${pattern.length} chars, max 200): ${pattern.slice(0, 50)}...`,
+        "",
+      );
+    }
+
+    // Max alternation depth: count '|' outside character classes
+    let alternationCount = 0;
+    let inCharClass = false;
+    for (let i = 0; i < pattern.length; i++) {
+      const ch = pattern[i];
+      if (ch === "\\" && i + 1 < pattern.length) { i++; continue; }
+      if (ch === "[") inCharClass = true;
+      if (ch === "]") inCharClass = false;
+      if (ch === "|" && !inCharClass) alternationCount++;
+    }
+    if (alternationCount > 20) {
+      throw new ConfigError(
+        `Regex pattern has too many alternations (${alternationCount}, max 20): ${pattern}`,
+        "",
+      );
+    }
+
+    // Check for deeply nested quantified groups: count depth of groups containing quantifiers
+    let maxNesting = 0;
+    let depth = 0;
+    for (let i = 0; i < pattern.length; i++) {
+      const ch = pattern[i];
+      if (ch === "\\" && i + 1 < pattern.length) { i++; continue; }
+      if (ch === "(") {
+        depth++;
+        // Peek ahead to see if this group contains a quantifier before closing
+        let groupHasQuantifier = false;
+        let groupDepth = 1;
+        for (let j = i + 1; j < pattern.length && groupDepth > 0; j++) {
+          const gc = pattern[j];
+          if (gc === "\\" && j + 1 < pattern.length) { j++; continue; }
+          if (gc === "(") groupDepth++;
+          if (gc === ")") { groupDepth--; continue; }
+          if ((gc === "+" || gc === "*" || gc === "{") && groupDepth === 1) {
+            groupHasQuantifier = true;
+          }
+        }
+        if (groupHasQuantifier && depth > maxNesting) maxNesting = depth;
+      }
+      if (ch === ")") depth--;
+    }
+    if (maxNesting > 3) {
+      throw new ConfigError(
+        `Regex pattern has deeply nested quantified groups (depth ${maxNesting}, max 3): ${pattern}`,
         "",
       );
     }

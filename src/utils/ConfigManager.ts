@@ -27,6 +27,11 @@ const DEFAULT_CONFIG: WardenConfig = {
 };
 
 export class ConfigManager {
+  private static readonly ALLOWED_KEYS: ReadonlySet<string> = new Set([
+    "log_level", "proxy_timeout_ms", "dashboard_port", "max_response_bytes",
+    "log_retention_days", "db_max_size_mb", "policy_path", "db_path", "policy_sync_url",
+  ]);
+
   private config: WardenConfig;
   private configPath: string;
 
@@ -58,15 +63,17 @@ export class ConfigManager {
     return path.join(ConfigManager.getConfigDir(), "config.yaml");
   }
 
+  static isSafeConfigPath(filePath: string): boolean {
+    const resolved = path.resolve(filePath);
+    const configDir = path.resolve(ConfigManager.getConfigDir());
+    return resolved.startsWith(configDir + path.sep) || resolved === configDir;
+  }
+
   static ensureConfigDir(): void {
     const dir = ConfigManager.getConfigDir();
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
+    fs.mkdirSync(dir, { recursive: true });
     const logDir = ConfigManager.getLogDir();
-    if (!fs.existsSync(logDir)) {
-      fs.mkdirSync(logDir, { recursive: true });
-    }
+    fs.mkdirSync(logDir, { recursive: true });
   }
 
   load(): WardenConfig {
@@ -90,8 +97,20 @@ export class ConfigManager {
   }
 
   save(config: Partial<WardenConfig>): void {
+    const filtered: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(config)) {
+      if (ConfigManager.ALLOWED_KEYS.has(key)) {
+        filtered[key] = value;
+      }
+    }
+    if (typeof filtered.policy_path === "string" && !ConfigManager.isSafeConfigPath(filtered.policy_path)) {
+      throw new ConfigError("policy_path must be within ~/.mcp-warden/", filtered.policy_path as string);
+    }
+    if (typeof filtered.db_path === "string" && !ConfigManager.isSafeConfigPath(filtered.db_path)) {
+      throw new ConfigError("db_path must be within ~/.mcp-warden/", filtered.db_path as string);
+    }
     ConfigManager.ensureConfigDir();
-    this.config = { ...this.config, ...config };
+    this.config = { ...this.config, ...filtered as Partial<WardenConfig> };
     const content = YAML.stringify(this.config);
     fs.writeFileSync(this.configPath, content, "utf-8");
   }

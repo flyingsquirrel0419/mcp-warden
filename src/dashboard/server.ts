@@ -203,15 +203,10 @@ export class DashboardServer {
       try {
         const policyPath = this.configManager.get("policy_path") || ConfigManager.getPolicyPath();
 
-        if (!fs.existsSync(policyPath)) {
-          res.json({ yaml: "", exists: false });
-          return;
-        }
-
         const content = fs.readFileSync(policyPath, "utf-8");
         res.json({ yaml: content, exists: true });
       } catch {
-        res.status(500).json({ error: "Failed to read policy" });
+        res.json({ yaml: "", exists: false });
       }
     });
 
@@ -226,6 +221,10 @@ export class DashboardServer {
         PolicyLoader.loadFromString(yamlContent);
 
         const policyPath = this.configManager.get("policy_path") || ConfigManager.getPolicyPath();
+        if (!ConfigManager.isSafeConfigPath(policyPath)) {
+          res.status(400).json({ error: "Invalid policy path" });
+          return;
+        }
 
         ConfigManager.ensureConfigDir();
         fs.writeFileSync(policyPath, yamlContent, "utf-8");

@@ -192,6 +192,26 @@ export class RequestHandler {
         ctx.requestTimeout ? { timeout: ctx.requestTimeout } : undefined,
       );
 
+      // Validate response structure
+      const validation = RequestHandler.validateToolResponse(response);
+      if (!validation.valid) {
+        const duration = performance.now() - startTime;
+        ctx.auditLogger.log({
+          server: ctx.serverName,
+          tool: toolName,
+          input: toolInput,
+          output_size: 0,
+          duration_ms: duration,
+          blocked: true,
+          block_reason: `Invalid MCP response: ${validation.error}`,
+          policy_mode: policyResult.mode,
+        });
+        return {
+          content: [{ type: "text" as const, text: `Blocked by Warden: upstream returned invalid response` }],
+          isError: true,
+        };
+      }
+
       const duration = performance.now() - startTime;
       const responseSize = JSON.stringify(response).length;
       const responseText = JSON.stringify(response);
@@ -320,5 +340,25 @@ export class RequestHandler {
     } else {
       RequestHandler.toolsCache.clear();
     }
+  }
+
+  private static validateToolResponse(response: unknown): { valid: boolean; error?: string } {
+    if (response === null || response === undefined || typeof response !== "object") {
+      return { valid: false, error: "Invalid response: not an object" };
+    }
+    const obj = response as Record<string, unknown>;
+    if (!Array.isArray(obj.content)) {
+      return { valid: false, error: "Invalid response: missing or invalid content array" };
+    }
+    for (const item of obj.content) {
+      if (typeof item !== "object" || item === null) {
+        return { valid: false, error: "Invalid response: content item is not an object" };
+      }
+      const contentItem = item as Record<string, unknown>;
+      if (typeof contentItem.type !== "string") {
+        return { valid: false, error: "Invalid response: content item missing type" };
+      }
+    }
+    return { valid: true };
   }
 }

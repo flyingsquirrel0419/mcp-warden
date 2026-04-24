@@ -63,9 +63,7 @@ export class Logger {
   private writeToFile(line: string): void {
     try {
       const dir = path.dirname(this.filePath);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
+      fs.mkdirSync(dir, { recursive: true });
       this.rotateIfNeeded();
       fs.appendFileSync(this.filePath, line + "\n");
     } catch {

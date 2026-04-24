@@ -154,7 +154,7 @@ export class PolicyEngine {
         let allMatch = true;
         for (const [field, regex] of rule.compiledPatterns) {
           const value = String(request.input[field] ?? "");
-          if (!regex.test(value)) {
+          if (!PolicyEngine.safeRegexTest(regex, value)) {
             allMatch = false;
             break;
           }
@@ -166,5 +166,18 @@ export class PolicyEngine {
       }
     }
     return null;
+  }
+
+  private static safeRegexTest(regex: RegExp, input: string, budgetMs: number = 50): boolean {
+    const start = process.hrtime.bigint();
+    const result = regex.test(input);
+    const elapsed = Number(process.hrtime.bigint() - start) / 1e6;
+    if (elapsed > budgetMs) {
+      console.warn(
+        `[PolicyEngine] Regex execution exceeded ${budgetMs}ms budget (${elapsed.toFixed(1)}ms) for pattern ${regex.source}, treating as no-match`,
+      );
+      return false;
+    }
+    return result;
   }
 }
