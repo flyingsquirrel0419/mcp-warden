@@ -18,6 +18,17 @@ This project follows a simple changelog format inspired by Keep a Changelog. Ver
 
 - `RequestHandler.toolsCache` converted from a static variable to a `Map` keyed by server name, preventing cross-proxy cache collisions in multi-server setups.
 - `RequestHandler.clearCache()` now accepts an optional `serverName` parameter for targeted cache invalidation.
+- `PolicySync.syncRepo()` now accepts an options object `{ branch?, verifySignature? }` instead of a plain branch string. Signature verification defaults to enabled.
+- Fast-forward-only check added to `PolicySync` pull path to prevent history rewrite attacks.
+
+### Added
+
+- `TrustedSigners` class for managing `~/.mcp-warden/allowed_signers` file.
+- `SignatureVerifier` class for verifying git commit SSH signatures via `git verify-commit`.
+- `PolicySignatureError` error class for signature verification failures.
+- `mcp-warden policy trust-key` CLI command to add trusted signers.
+- `mcp-warden policy list-keys` CLI command to list trusted signers.
+- `--no-verify` flag on `mcp-warden policy sync` to skip signature verification.
 
 ## 0.1.0
 
