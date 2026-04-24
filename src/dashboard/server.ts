@@ -46,6 +46,20 @@ export class DashboardServer {
   }
 
   private setupMiddleware(): void {
+    this.app.use((req, res, next) => {
+      const remoteAddr = req.socket.remoteAddress ?? "";
+      const isLocal =
+        remoteAddr === "127.0.0.1" ||
+        remoteAddr === "::1" ||
+        remoteAddr === "::ffff:127.0.0.1" ||
+        remoteAddr === "localhost" ||
+        remoteAddr === "";
+      if (!isLocal) {
+        res.status(403).json({ error: "Access denied: non-local origin" });
+        return;
+      }
+      next();
+    });
     this.app.use(express.json({ limit: "1mb" }));
     const publicDir = path.resolve(path.dirname(new URL(import.meta.url).pathname), "public");
     this.app.use(express.static(publicDir));

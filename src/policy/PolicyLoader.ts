@@ -96,14 +96,44 @@ export class PolicyLoader {
     return { defaults, servers };
   }
 
+  private static validateRegexSafety(pattern: string): void {
+    // Max pattern length
+    if (pattern.length > 200) {
+      throw new ConfigError(
+        `Regex pattern too long (${pattern.length} chars, max 200): ${pattern.slice(0, 50)}...`,
+        "",
+      );
+    }
+
+    // Check for ReDoS-vulnerable patterns:
+    // - Nested quantifiers like (a+)+ or (a*)*
+    // - Alternation with overlapping quantifiers like (a|a)+
+    const dangerousPatterns = [
+      /\([^)]*[+*{][^)]*\)[+*{]/,     // nested quantifiers: (a+)+
+      /\([^)]*\|[^)]*\)[+*{]/,        // alternation with quantifier: (a|b)+
+      /\(\?:[^)]*[+*{][^)]*\)[+*{]/,  // non-capturing nested: (?:a+)+
+    ];
+
+    for (const dangerous of dangerousPatterns) {
+      if (dangerous.test(pattern)) {
+        throw new ConfigError(
+          `Regex pattern may cause catastrophic backtracking (ReDoS): ${pattern}`,
+          "",
+        );
+      }
+    }
+  }
+
   private static compileRules(rules: PolicyRule[]): CompiledRule[] {
     return rules.map((rule) => {
       const compiledPatterns = new Map<string, RegExp>();
       if (rule.match.input) {
         for (const [field, config] of Object.entries(rule.match.input)) {
           try {
+            PolicyLoader.validateRegexSafety(config.pattern);
             compiledPatterns.set(field, new RegExp(config.pattern, "i"));
           } catch (err) {
+            if (err instanceof ConfigError) throw err;
             throw new ConfigError(
               `Invalid regex in rule "${rule.name}" for field "${field}": ${config.pattern}`,
               "",

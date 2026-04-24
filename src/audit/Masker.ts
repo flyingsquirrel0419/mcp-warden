@@ -39,10 +39,9 @@ export class Masker {
    * Shows first 8 characters, then "***REDACTED***"
    */
   static maskString(value: string): string {
-    for (const { pattern } of Masker.TOKEN_VALUE_PATTERNS) {
+    for (const { pattern, name } of Masker.TOKEN_VALUE_PATTERNS) {
       if (pattern.test(value)) {
-        const prefix = value.slice(0, 8);
-        return `${prefix}...${Masker.REDACTED}`;
+        return `[${name}-key]${Masker.REDACTED}`;
       }
     }
     return value;

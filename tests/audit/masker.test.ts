@@ -72,10 +72,31 @@ describe("Masker", () => {
   });
 
   describe("maskString()", () => {
-    it("masks Anthropic key format", () => {
+    it("masks Anthropic key format with type label", () => {
       const result = Masker.maskString("sk-ant-api03-abcdef123456");
-      expect(result).toContain("***REDACTED***");
-      expect(result).toContain("sk-ant-a");
+      expect(result).toBe("[anthropic-key]***REDACTED***");
+    });
+
+    it("masks OpenAI key format", () => {
+      const result = Masker.maskString("sk-proj-abc123xyz");
+      expect(result).toBe("[openai-key]***REDACTED***");
+    });
+
+    it("masks GitHub token format", () => {
+      const result = Masker.maskString("ghp_ABCDEFGH123456");
+      expect(result).toBe("[github-key]***REDACTED***");
+    });
+
+    it("masks AWS key format", () => {
+      const result = Masker.maskString("AKIAIOSFODNN7EXAMPLE");
+      expect(result).toBe("[aws-key]***REDACTED***");
+    });
+
+    it("does not expose raw secret characters", () => {
+      const result = Masker.maskString("sk-ant-api03-supersecret");
+      expect(result).not.toContain("sk-ant-a");
+      expect(result).not.toContain("supersecret");
+      expect(result).not.toContain("api03");
     });
 
     it("returns unchanged string for non-token values", () => {

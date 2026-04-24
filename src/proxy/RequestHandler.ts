@@ -53,7 +53,7 @@ export interface RequestHandlerContext {
 }
 
 export class RequestHandler {
-  private static toolsCache: Array<{ name: string; description?: string }> | null = null;
+  private static toolsCache = new Map<string, Array<{ name: string; description?: string }>>();
 
   static registerHandlers(ctx: RequestHandlerContext): void {
     if (ctx.capabilities.tools) {
@@ -302,18 +302,23 @@ export class RequestHandler {
     ctx: RequestHandlerContext,
     request: { params?: Record<string, unknown> },
   ): Promise<{ tools: Array<{ name: string; description?: string }> }> {
-    if (RequestHandler.toolsCache) {
-      return { tools: RequestHandler.toolsCache };
+    const cached = RequestHandler.toolsCache.get(ctx.serverName);
+    if (cached) {
+      return { tools: cached };
     }
     const result = await ctx.client.listTools(
       request.params,
       ctx.requestTimeout ? { timeout: ctx.requestTimeout } : undefined,
     );
-    RequestHandler.toolsCache = result.tools;
+    RequestHandler.toolsCache.set(ctx.serverName, result.tools);
     return result;
   }
 
-  static clearCache(): void {
-    RequestHandler.toolsCache = null;
+  static clearCache(serverName?: string): void {
+    if (serverName) {
+      RequestHandler.toolsCache.delete(serverName);
+    } else {
+      RequestHandler.toolsCache.clear();
+    }
   }
 }

@@ -44,6 +44,24 @@ describe("SsrfGuard", () => {
       expect(r.blocked).toBe(true);
       expect(r.category).toBe("loopback");
     });
+
+    it("blocks http://127.0.0.2", () => {
+      const r = guard.checkUrl("http://127.0.0.2");
+      expect(r.blocked).toBe(true);
+      expect(r.category).toBe("loopback");
+    });
+
+    it("blocks http://127.1.0.1", () => {
+      const r = guard.checkUrl("http://127.1.0.1");
+      expect(r.blocked).toBe(true);
+      expect(r.category).toBe("loopback");
+    });
+
+    it("blocks http://127.255.255.255", () => {
+      const r = guard.checkUrl("http://127.255.255.255");
+      expect(r.blocked).toBe(true);
+      expect(r.category).toBe("loopback");
+    });
   });
 
   describe("checkUrl – private IPv4 ranges", () => {
@@ -188,6 +206,7 @@ describe("SsrfGuard", () => {
   describe("isInternal static", () => {
     it("returns true for internal addresses", () => {
       expect(SsrfGuard.isInternal("http://127.0.0.1")).toBe(true);
+      expect(SsrfGuard.isInternal("http://127.0.0.2")).toBe(true);
       expect(SsrfGuard.isInternal("http://10.0.0.1")).toBe(true);
       expect(SsrfGuard.isInternal("http://localhost")).toBe(true);
     });

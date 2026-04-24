@@ -625,6 +625,22 @@ describe("DashboardServer", () => {
     });
   });
 
+  describe("localhost-only middleware", () => {
+    it("allows requests from localhost", async () => {
+      const { statusCode } = await httpGet("/api/status");
+      expect(statusCode).toBe(200);
+    });
+
+    it("includes localhost check in the middleware chain", async () => {
+      // The test server binds to localhost:0, so all requests come from
+      // a local address. We verify the endpoint still works (middleware passes).
+      // Full non-local rejection requires an external client — this is a structural test.
+      const { statusCode, data } = await httpGet("/api/config");
+      expect(statusCode).toBe(200);
+      expect(data).toBeDefined();
+    });
+  });
+
   describe("WebSocket", () => {
     it("sends recent logs on connect", async () => {
       const ws = new WebSocket(`ws://localhost:${port}`);

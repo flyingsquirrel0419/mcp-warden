@@ -130,4 +130,92 @@ servers:
     expect(policy.defaults.alertOnNewTool).toBe(true);
     expect(policy.servers.size).toBe(0);
   });
+
+  describe("regex safety validation", () => {
+    it("accepts simple patterns", () => {
+      const yaml = `
+version: 1
+servers:
+  test:
+    rules:
+      - name: test-rule
+        match:
+          input:
+            token:
+              pattern: ".+"
+        action: block
+        message: blocked
+`;
+      expect(() => PolicyLoader.loadFromString(yaml)).not.toThrow();
+    });
+
+    it("rejects pattern longer than 200 chars", () => {
+      const longPattern = "a".repeat(201);
+      const yaml = `
+version: 1
+servers:
+  test:
+    rules:
+      - name: test-rule
+        match:
+          input:
+            token:
+              pattern: "${longPattern}"
+        action: block
+        message: blocked
+`;
+      expect(() => PolicyLoader.loadFromString(yaml)).toThrow(ConfigError);
+    });
+
+    it("rejects nested quantifiers (a+)+", () => {
+      const yaml = `
+version: 1
+servers:
+  test:
+    rules:
+      - name: redo
+        match:
+          input:
+            field:
+              pattern: "(a+)+b"
+        action: block
+        message: redo
+`;
+      expect(() => PolicyLoader.loadFromString(yaml)).toThrow(/ReDoS/i);
+    });
+
+    it("rejects alternation quantifier (a|b)+", () => {
+      const yaml = `
+version: 1
+servers:
+  test:
+    rules:
+      - name: redo
+        match:
+          input:
+            field:
+              pattern: "(a|b)+c"
+        action: block
+        message: redo
+`;
+      expect(() => PolicyLoader.loadFromString(yaml)).toThrow(/ReDoS/i);
+    });
+
+    it("rejects non-capturing nested quantifiers (?:a+)+", () => {
+      const yaml = `
+version: 1
+servers:
+  test:
+    rules:
+      - name: redo
+        match:
+          input:
+            field:
+              pattern: "(?:a+)+b"
+        action: block
+        message: redo
+`;
+      expect(() => PolicyLoader.loadFromString(yaml)).toThrow(/ReDoS/i);
+    });
+  });
 });

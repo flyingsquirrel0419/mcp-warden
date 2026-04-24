@@ -43,7 +43,8 @@ function isIPv6(s: string): boolean {
 }
 
 function classifyIPv4(ip: string): SsrfResult["category"] | null {
-  if (ip === "127.0.0.1" || ip === "0.0.0.0") return "loopback";
+  if (ipv4InCidr(ip, "127.0.0.0", 8)) return "loopback";
+  if (ip === "0.0.0.0") return "loopback";
   if (ipv4InCidr(ip, "169.254.0.0", 16)) return "link-local";
   if (ipv4InCidr(ip, "10.0.0.0", 8)) return "private-ipv4";
   if (ipv4InCidr(ip, "192.168.0.0", 16)) return "private-ipv4";
