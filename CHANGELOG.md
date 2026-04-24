@@ -8,6 +8,9 @@ This project follows a simple changelog format inspired by Keep a Changelog. Ver
 
 ### Security
 
+- **Runtime security detectors now enabled**: the proxy now wires SSRF, prompt-injection, data-leak, and notification components into the live `RequestHandler` path instead of only testing them in isolation.
+- **Audit log shutdown flush**: pending audit writes are tracked and flushed before proxy shutdown closes SQLite, reducing the chance of losing final blocked/allowed decision records.
+- **Policy sync ESM runtime fix**: removed dynamic CommonJS `require()` usage from policy sync/config parsing paths so the ESM bundle works when reading synced policy configuration.
 - **SSRF loopback range fixed**: entire `127.0.0.0/8` range is now blocked (previously only `127.0.0.1`). Addresses `127.0.0.2`–`127.255.255.255` were passing through unchecked.
 - **ReDoS protection added**: policy YAML regex patterns are validated before compilation. Patterns exceeding 200 characters or containing nested quantifiers (e.g. `(a+)+`) are rejected.
 - **Masker no longer leaks secret prefixes**: `maskString()` replaced raw 8-char prefix with a named token type label (e.g. `[anthropic-key]***REDACTED***`).
@@ -16,6 +19,9 @@ This project follows a simple changelog format inspired by Keep a Changelog. Ver
 
 ### Changed
 
+- MCP target parsing and config wrapping now preserve quoted arguments with spaces instead of flattening command arrays into lossy strings.
+- Rate limiter counters are now persisted through the local SQLite `rate_limits` table when a database is available.
+- New-tool detection is carried through policy evaluation to avoid double-mutating the known-tool state before notification dispatch.
 - `RequestHandler.toolsCache` converted from a static variable to a `Map` keyed by server name, preventing cross-proxy cache collisions in multi-server setups.
 - `RequestHandler.clearCache()` now accepts an optional `serverName` parameter for targeted cache invalidation.
 - `PolicySync.syncRepo()` now accepts an options object `{ branch?, verifySignature? }` instead of a plain branch string. Signature verification defaults to enabled.
@@ -23,6 +29,7 @@ This project follows a simple changelog format inspired by Keep a Changelog. Ver
 
 ### Added
 
+- Regression coverage for live proxy security wiring, audit flush behavior, ESM-safe policy sync config parsing, quoted MCP target parsing, and database-backed rate-limit persistence.
 - `TrustedSigners` class for managing `~/.mcp-warden/allowed_signers` file.
 - `SignatureVerifier` class for verifying git commit SSH signatures via `git verify-commit`.
 - `PolicySignatureError` error class for signature verification failures.
