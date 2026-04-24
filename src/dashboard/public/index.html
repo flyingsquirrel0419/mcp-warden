@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MCP Warden Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-brand">
+        <svg
+          class="header-logo"
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+        <h1 class="header-title">MCP Warden</h1>
+      </div>
+      <nav class="header-nav">
+        <button class="nav-btn active" data-tab="overview">Overview</button>
+        <button class="nav-btn" data-tab="analytics">Analytics</button>
+        <button class="nav-btn" data-tab="settings">Settings</button>
+      </nav>
+      <div class="header-indicator">
+        <span class="ws-status" id="wsStatus" title="WebSocket disconnected">●</span>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- Overview Tab -->
+      <section class="tab-panel active" id="tab-overview">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Total Calls</span>
+            <span class="stat-value" id="statTotalCalls">—</span>
+          </div>
+          <div class="stat-card stat-card--blocked">
+            <span class="stat-label">Blocked</span>
+            <span class="stat-value" id="statBlocked">—</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Active Servers</span>
+            <span class="stat-value" id="statActiveServers">—</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Avg Response</span>
+            <span class="stat-value" id="statAvgResponse">—</span>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <section class="card">
+            <h2 class="card-title">Server Status</h2>
+            <div id="serverStatus" class="server-list">
+              <p class="empty-state">No server data yet</p>
+            </div>
+          </section>
+
+          <section class="card card--wide">
+            <h2 class="card-title">Recent Activity</h2>
+            <div class="table-wrap">
+              <table class="log-table" id="recentLogs">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Server</th>
+                    <th>Tool</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- Analytics Tab -->
+      <section class="tab-panel" id="tab-analytics">
+        <div class="analytics-controls">
+          <div class="btn-group">
+            <button class="btn-group__btn active" data-days="7">7 Days</button>
+            <button class="btn-group__btn" data-days="30">30 Days</button>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <section class="card card--wide">
+            <h2 class="card-title">Daily Call Volume</h2>
+            <div class="chart-container" id="dailyChart"></div>
+          </section>
+
+          <section class="card">
+            <h2 class="card-title">Top Tools</h2>
+            <div class="chart-container chart-container--vertical" id="topToolsChart"></div>
+          </section>
+
+          <section class="card">
+            <h2 class="card-title">Server Breakdown</h2>
+            <div class="table-wrap">
+              <table class="log-table" id="serverBreakdown">
+                <thead>
+                  <tr>
+                    <th>Server</th>
+                    <th>Calls</th>
+                    <th>Blocked</th>
+                    <th>Avg ms</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- Settings Tab -->
+      <section class="tab-panel" id="tab-settings">
+        <div class="content-grid">
+          <section class="card card--wide">
+            <h2 class="card-title">Policy Editor</h2>
+            <div class="editor-wrap">
+              <textarea
+                class="yaml-editor"
+                id="policyEditor"
+                spellcheck="false"
+                placeholder="Loading policy..."
+              ></textarea>
+            </div>
+            <div class="editor-actions">
+              <span class="save-status" id="saveStatus"></span>
+              <button class="btn btn--primary" id="savePolicy">Save Policy</button>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2 class="card-title">Configuration</h2>
+            <div class="config-display" id="configDisplay">
+              <p class="empty-state">Loading...</p>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
