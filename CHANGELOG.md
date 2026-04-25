@@ -2,9 +2,13 @@
 
 All notable changes to MCP Warden will be documented in this file.
 
-This project follows a simple changelog format inspired by Keep a Changelog. Versioning is pre-1.0 and may change rapidly.
+This project follows a simple changelog format inspired by Keep a Changelog.
 
 ## Unreleased
+
+No unreleased changes.
+
+## 1.0.0
 
 ### Security
 
@@ -22,6 +26,9 @@ This project follows a simple changelog format inspired by Keep a Changelog. Ver
 - MCP target parsing and config wrapping now preserve quoted arguments with spaces instead of flattening command arrays into lossy strings.
 - Rate limiter counters are now persisted through the local SQLite `rate_limits` table when a database is available.
 - New-tool detection is carried through policy evaluation to avoid double-mutating the known-tool state before notification dispatch.
+- Build output now refreshes dashboard static assets before packaging to avoid nested stale `dist/public/public` assets.
+- CLI and MCP client/server runtime version strings now report `1.0.0`.
+- Project license changed from MIT to Apache-2.0.
 - `RequestHandler.toolsCache` converted from a static variable to a `Map` keyed by server name, preventing cross-proxy cache collisions in multi-server setups.
 - `RequestHandler.clearCache()` now accepts an optional `serverName` parameter for targeted cache invalidation.
 - `PolicySync.syncRepo()` now accepts an options object `{ branch?, verifySignature? }` instead of a plain branch string. Signature verification defaults to enabled.
@@ -29,6 +36,9 @@ This project follows a simple changelog format inspired by Keep a Changelog. Ver
 
 ### Added
 
+- Tag-based GitHub Actions release workflow for npm, Homebrew formula, and curl installer distribution.
+- `scripts/install.sh` curl installer and Homebrew formula generation for release assets.
+- Release guide documenting tag format, optional `NPM_TOKEN`, release assets, and install commands.
 - Regression coverage for live proxy security wiring, audit flush behavior, ESM-safe policy sync config parsing, quoted MCP target parsing, and database-backed rate-limit persistence.
 - `TrustedSigners` class for managing `~/.mcp-warden/allowed_signers` file.
 - `SignatureVerifier` class for verifying git commit SSH signatures via `git verify-commit`.
@@ -41,16 +51,6 @@ This project follows a simple changelog format inspired by Keep a Changelog. Ver
 
 ### Added
 
-- README with installation, usage, policy, dashboard, and development guidance.
-- GitHub Actions CI workflow.
-- Prettier configuration and format scripts.
-- Community and project documentation.
-- Upgraded Vitest and coverage tooling to resolve npm audit findings.
-
-## 0.1.0
-
-### Added
-
 - MCP proxy for stdio and HTTP targets.
 - Policy engine with `passthrough`, `audit-only`, and `enforcing` modes.
 - Allow lists, block lists, custom rules, and rate limits.
@@ -58,3 +58,8 @@ This project follows a simple changelog format inspired by Keep a Changelog. Ver
 - SSRF, prompt injection, and data leak detectors.
 - MCP server discovery, wrapping, scan, policy sync, log, status, and dashboard commands.
 - Local dashboard API and WebSocket support.
+- README with installation, usage, policy, dashboard, and development guidance.
+- GitHub Actions CI workflow.
+- Prettier configuration and format scripts.
+- Community and project documentation.
+- Upgraded Vitest and coverage tooling to resolve npm audit findings.

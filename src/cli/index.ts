@@ -7,13 +7,14 @@ import { registerScanCommand } from "./commands/scan.js";
 import { registerDashboardCommand } from "./commands/dashboard.js";
 import { registerDiscoverCommand } from "./commands/discover.js";
 import { registerPolicyCommand } from "./commands/policy.js";
+import { VERSION } from "../version.js";
 
 export function createProgram(): Command {
   const program = new Command();
   program
     .name("mcp-warden")
     .description("Local-first security gateway for MCP servers")
-    .version("0.1.0");
+    .version(VERSION);
   registerProxyCommand(program);
   registerInitCommand(program);
   registerStatusCommand(program);

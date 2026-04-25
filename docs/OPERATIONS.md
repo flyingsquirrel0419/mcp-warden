@@ -131,3 +131,9 @@ npm test
 npm run build
 npm audit
 ```
+
+## Release Operations
+
+Releases are tag-driven. Pushing `vX.Y.Z` runs the release workflow, validates that the tag matches `package.json`, publishes npm when `NPM_TOKEN` is configured, and attaches Homebrew/curl assets to the GitHub Release.
+
+See [Release Guide](RELEASE.md) for the full checklist.

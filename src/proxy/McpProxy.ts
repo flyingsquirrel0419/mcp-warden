@@ -20,6 +20,7 @@ import { InjectionDetector } from "../security/InjectionDetector.js";
 import { SsrfGuard } from "../security/SsrfGuard.js";
 import { DataLeakDetector } from "../security/DataLeakDetector.js";
 import { Notifier } from "../daemon/Notifier.js";
+import { VERSION } from "../version.js";
 
 export interface ProxyConfig {
   target: string;
@@ -69,7 +70,7 @@ export class McpProxy {
 
     // 4. Create Client + Transport (connect to upstream)
     const isHttp = HttpTransport.isHttpTarget(this.config.target);
-    this.client = new Client({ name: "mcp-warden", version: "0.1.0" }, { capabilities: {} });
+    this.client = new Client({ name: "mcp-warden", version: VERSION }, { capabilities: {} });
 
     try {
       if (HttpTransport.isHttpTarget(this.config.target)) {
@@ -99,7 +100,7 @@ export class McpProxy {
     const capabilities = HandshakeManager.transformCapabilities(upstreamCapabilities);
 
     // 6. Create Server + StdioServerTransport
-    this.server = new Server({ name: this.config.serverName, version: "0.1.0" }, { capabilities });
+    this.server = new Server({ name: this.config.serverName, version: VERSION }, { capabilities });
 
     // 7. Wire notification relay
     NotificationRelay.wire(this.client, this.server, upstreamCapabilities);

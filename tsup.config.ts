@@ -11,5 +11,5 @@ export default defineConfig({
   sourcemap: true,
   dts: { resolve: ["@modelcontextprotocol/sdk"] },
   outDir: "dist",
-  onSuccess: "cp -r src/dashboard/public dist/public",
+  onSuccess: "rm -rf dist/public && cp -r src/dashboard/public dist/public",
 });

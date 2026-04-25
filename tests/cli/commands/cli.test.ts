@@ -31,8 +31,8 @@ describe("CLI", () => {
     expect(cmds).toContain("log");
   });
 
-  it("has version 0.1.0", () => {
+  it("has version 1.0.0", () => {
     const program = createProgram();
-    expect(program.version()).toBe("0.1.0");
+    expect(program.version()).toBe("1.0.0");
   });
 });

@@ -2,6 +2,7 @@ import type { Command } from "commander";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { StdioTransport } from "../../proxy/StdioTransport.js";
+import { VERSION } from "../../version.js";
 
 export interface ToolRisk {
   name: string;
@@ -181,7 +182,7 @@ export function registerScanCommand(program: Command): void {
 
       const { command, args } = parseCommand(target);
       const transport = new StdioClientTransport({ command, args });
-      const client = new Client({ name: "mcp-warden-scanner", version: "0.1.0" });
+      const client = new Client({ name: "mcp-warden-scanner", version: VERSION });
 
       try {
         await client.connect(transport);

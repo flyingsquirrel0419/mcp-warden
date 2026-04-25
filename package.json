@@ -1,6 +1,6 @@
 {
   "name": "mcp-warden",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Local-first security gateway for MCP servers",
   "bin": {
@@ -50,5 +50,5 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "license": "MIT"
+  "license": "Apache-2.0"
 }

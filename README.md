@@ -7,7 +7,7 @@ Local-first security gateway for MCP servers.
 [![CI](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 ![Node](https://img.shields.io/badge/node-%3E%3D20.0.0-339933)
 ![TypeScript](https://img.shields.io/badge/typescript-5.x-3178C6)
-![License](https://img.shields.io/badge/license-MIT-blue)
+![License](https://img.shields.io/badge/license-Apache--2.0-blue)
 
 </div>
 
@@ -68,11 +68,48 @@ The proxy keeps the MCP protocol boundary intact:
 
 ## Installation
 
+### From npm
+
+Install globally:
+
+```bash
+npm install -g mcp-warden
+mcp-warden --help
+```
+
+Run without installing:
+
+```bash
+npx mcp-warden --help
+```
+
+### From Homebrew
+
+Install from the GitHub release formula:
+
+```bash
+brew install --formula https://github.com/flyingsquirrel0419/mcp-warden/releases/latest/download/mcp-warden.rb
+```
+
+### With curl
+
+Install the latest GitHub release through npm:
+
+```bash
+curl -fsSL https://github.com/flyingsquirrel0419/mcp-warden/releases/latest/download/install.sh | sh
+```
+
+Install a specific version:
+
+```bash
+MCP_WARDEN_VERSION=1.0.0 sh -c "$(curl -fsSL https://github.com/flyingsquirrel0419/mcp-warden/releases/latest/download/install.sh)"
+```
+
 ### From source
 
 ```bash
-git clone <repo-url>
-cd warden
+git clone https://github.com/flyingsquirrel0419/mcp-warden.git
+cd mcp-warden
 npm ci
 npm run build
 ```
@@ -237,6 +274,7 @@ Dashboard APIs include:
 - [Policy guide](docs/POLICY.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Operations guide](docs/OPERATIONS.md)
+- [Release guide](docs/RELEASE.md)
 - [Security model](docs/SECURITY_MODEL.md)
 - [Security policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
@@ -350,4 +388,4 @@ Recommended workflow:
 
 ## License
 
-MIT
+Apache-2.0
