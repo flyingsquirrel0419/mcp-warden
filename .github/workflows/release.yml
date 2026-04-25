@@ -63,30 +63,35 @@ jobs:
           set -euo pipefail
           mkdir -p release
           npm pack --pack-destination release
-          PACKAGE_FILE="$(find release -maxdepth 1 -name 'mcp-warden-*.tgz' -print -quit)"
+          PACKAGE_FILE="$(find release -maxdepth 1 -name 'warden-cli-*.tgz' -print -quit)"
           if [ -z "${PACKAGE_FILE}" ]; then
             echo "npm pack did not create a package tarball." >&2
             exit 1
           fi
-          cp "${PACKAGE_FILE}" release/mcp-warden.tgz
+          cp "${PACKAGE_FILE}" release/warden-cli.tgz
           echo "PACKAGE_FILE=${PACKAGE_FILE}" >> "${GITHUB_ENV}"
 
       - name: Generate checksums and Homebrew formula
         run: |
           set -euo pipefail
-          TARBALL_SHA="$(sha256sum release/mcp-warden.tgz | awk '{print $1}')"
-          MCP_WARDEN_TARBALL_SHA256="${TARBALL_SHA}" node scripts/generate-homebrew-formula.mjs
+          TARBALL_SHA="$(sha256sum release/warden-cli.tgz | awk '{print $1}')"
+          WARDEN_CLI_TARBALL_SHA256="${TARBALL_SHA}" node scripts/generate-homebrew-formula.mjs
           cp scripts/install.sh release/install.sh
           chmod +x release/install.sh
-          (cd release && sha256sum mcp-warden*.tgz mcp-warden.rb install.sh > checksums.txt)
+          (cd release && sha256sum warden-cli*.tgz warden-cli.rb install.sh > checksums.txt)
 
       - name: Publish to npm when NPM_TOKEN is configured
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
+          PACKAGE_VERSION="$(node -p "require('./package.json').version")"
           if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
             echo "::notice::NPM_TOKEN is not configured; skipping npm publish."
+            exit 0
+          fi
+          if npm view "warden-cli@${PACKAGE_VERSION}" version >/dev/null 2>&1; then
+            echo "::notice::warden-cli@${PACKAGE_VERSION} already exists on npm; skipping npm publish."
             exit 0
           fi
           npm publish "${PACKAGE_FILE}" --access public --provenance
@@ -97,8 +102,8 @@ jobs:
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
           files: |
-            release/mcp-warden-*.tgz
-            release/mcp-warden.tgz
-            release/mcp-warden.rb
+            release/warden-cli-*.tgz
+            release/warden-cli.tgz
+            release/warden-cli.rb
             release/install.sh
             release/checksums.txt

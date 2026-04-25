@@ -182,7 +182,7 @@ export function registerScanCommand(program: Command): void {
 
       const { command, args } = parseCommand(target);
       const transport = new StdioClientTransport({ command, args });
-      const client = new Client({ name: "mcp-warden-scanner", version: VERSION });
+      const client = new Client({ name: "warden-scanner", version: VERSION });
 
       try {
         await client.connect(transport);

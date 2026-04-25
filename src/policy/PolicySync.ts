@@ -24,7 +24,7 @@ export class PolicySync {
   private cacheDir: string;
 
   constructor(cacheDir?: string) {
-    this.cacheDir = cacheDir ?? path.join(os.homedir(), ".mcp-warden", "policy-cache");
+    this.cacheDir = cacheDir ?? path.join(os.homedir(), ".warden", "policy-cache");
   }
 
   syncRepo(repoUrl: string, options?: { branch?: string; verifySignature?: boolean }): string {
@@ -162,17 +162,17 @@ export class PolicySync {
           `Refusing to apply unverified policy.\n` +
             `Reason: Commit is not signed. SSH-signed commits are required.\n\n` +
             `To trust a signer, run:\n` +
-            `  mcp-warden policy trust-key --identity user@example.com --key "ssh-ed25519 AAAA..."\n` +
+            `  warden policy trust-key --identity user@example.com --key "ssh-ed25519 AAAA..."\n` +
             `To skip verification, pass --no-verify.`,
         );
       }
 
-      const signersPath = path.join(os.homedir(), ".mcp-warden", "allowed_signers");
+      const signersPath = path.join(os.homedir(), ".warden", "allowed_signers");
       if (!fs.existsSync(signersPath)) {
         throw new PolicySignatureError(
           `No trusted signers configured.\n` +
-            `Create ~/.mcp-warden/allowed_signers or run:\n` +
-            `  mcp-warden policy trust-key --identity user@example.com --key "ssh-ed25519 AAAA..."`,
+            `Create ~/.warden/allowed_signers or run:\n` +
+            `  warden policy trust-key --identity user@example.com --key "ssh-ed25519 AAAA..."`,
         );
       }
 
@@ -197,7 +197,7 @@ export class PolicySync {
             `Signature verification failed.\n` +
               `Reason: ${stderr.slice(0, 200) || "Signer not in trusted list"}\n\n` +
               `To trust a signer, run:\n` +
-              `  mcp-warden policy trust-key --identity user@example.com --key "ssh-ed25519 AAAA..."`,
+              `  warden policy trust-key --identity user@example.com --key "ssh-ed25519 AAAA..."`,
           );
         }
       }

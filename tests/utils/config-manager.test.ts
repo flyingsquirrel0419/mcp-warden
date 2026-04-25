@@ -23,14 +23,12 @@ describe("ConfigManager", () => {
     expect(config.log_retention_days).toBe(30);
   });
 
-  it("getConfigDir returns ~/.mcp-warden/", () => {
-    expect(ConfigManager.getConfigDir()).toBe(path.join(os.homedir(), ".mcp-warden"));
+  it("getConfigDir returns ~/.warden/", () => {
+    expect(ConfigManager.getConfigDir()).toBe(path.join(os.homedir(), ".warden"));
   });
 
-  it("getPolicyPath returns ~/.mcp-warden/policy.yaml", () => {
-    expect(ConfigManager.getPolicyPath()).toBe(
-      path.join(os.homedir(), ".mcp-warden", "policy.yaml"),
-    );
+  it("getPolicyPath returns ~/.warden/policy.yaml", () => {
+    expect(ConfigManager.getPolicyPath()).toBe(path.join(os.homedir(), ".warden", "policy.yaml"));
   });
 
   it("ensureConfigDir creates directory", () => {

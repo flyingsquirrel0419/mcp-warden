@@ -1,4 +1,4 @@
-# Contributing to MCP Warden
+# Contributing to Warden CLI
 
 First off — thanks for wanting to help. MCP security tooling is early-stage and there's a lot of room to make it genuinely better. Every contribution matters.
 
@@ -18,8 +18,8 @@ If you have an idea that doesn't fit these categories, open an issue first to di
 ## 🛠️ Development Setup
 
 ```bash
-git clone https://github.com/flyingsquirrel0419/mcp-warden.git
-cd mcp-warden
+git clone https://github.com/flyingsquirrel0419/warden-cli.git
+cd warden
 npm ci
 npm run build
 npm test
@@ -29,7 +29,7 @@ For local CLI testing:
 
 ```bash
 npm link
-mcp-warden --help
+warden --help
 ```
 
 ## 🌿 Branch Workflow

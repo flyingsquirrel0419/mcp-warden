@@ -10,7 +10,7 @@ export class WardenDatabase {
   private static instance: WardenDatabase | null = null;
 
   constructor(dbPath?: string) {
-    this.dbPath = dbPath ?? path.join(os.homedir(), ".mcp-warden", "warden.db");
+    this.dbPath = dbPath ?? path.join(os.homedir(), ".warden", "warden.db");
   }
 
   static getInstance(dbPath?: string): WardenDatabase {

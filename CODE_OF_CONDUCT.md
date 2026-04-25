@@ -1,6 +1,6 @@
 # Code of Conduct
 
-MCP Warden aims to be a practical and respectful project for people building safer local MCP workflows.
+Warden CLI aims to be a practical and respectful project for people building safer local MCP workflows.
 
 ## Expected Behavior
 

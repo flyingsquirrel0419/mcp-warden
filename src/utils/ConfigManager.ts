@@ -51,7 +51,7 @@ export class ConfigManager {
   }
 
   static getConfigDir(): string {
-    return path.join(os.homedir(), ".mcp-warden");
+    return path.join(os.homedir(), ".warden");
   }
 
   static getPolicyPath(): string {
@@ -115,12 +115,12 @@ export class ConfigManager {
       !ConfigManager.isSafeConfigPath(filtered.policy_path)
     ) {
       throw new ConfigError(
-        "policy_path must be within ~/.mcp-warden/",
+        "policy_path must be within ~/.warden/",
         filtered.policy_path as string,
       );
     }
     if (typeof filtered.db_path === "string" && !ConfigManager.isSafeConfigPath(filtered.db_path)) {
-      throw new ConfigError("db_path must be within ~/.mcp-warden/", filtered.db_path as string);
+      throw new ConfigError("db_path must be within ~/.warden/", filtered.db_path as string);
     }
     ConfigManager.ensureConfigDir();
     this.config = { ...this.config, ...(filtered as Partial<WardenConfig>) };

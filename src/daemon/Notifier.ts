@@ -85,7 +85,7 @@ export class Notifier {
     try {
       const notifier = await import("node-notifier");
       notifier.default?.({
-        title: `[mcp-warden] ${event.severity} - ${event.type}`,
+        title: `[warden] ${event.severity} - ${event.type}`,
         message: this.formatMessage(event),
       });
     } catch {

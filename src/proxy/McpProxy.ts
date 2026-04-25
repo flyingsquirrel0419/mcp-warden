@@ -45,7 +45,7 @@ export class McpProxy {
   }
 
   async start(): Promise<void> {
-    this.logger.info("Starting MCP Warden proxy", { server: this.config.serverName });
+    this.logger.info("Starting Warden CLI proxy", { server: this.config.serverName });
 
     // 1. Initialize Database
     const dbPath = ConfigManager.getDbPath();
@@ -70,7 +70,7 @@ export class McpProxy {
 
     // 4. Create Client + Transport (connect to upstream)
     const isHttp = HttpTransport.isHttpTarget(this.config.target);
-    this.client = new Client({ name: "mcp-warden", version: VERSION }, { capabilities: {} });
+    this.client = new Client({ name: "warden", version: VERSION }, { capabilities: {} });
 
     try {
       if (HttpTransport.isHttpTarget(this.config.target)) {

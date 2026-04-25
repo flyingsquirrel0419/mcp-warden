@@ -7,7 +7,7 @@ import { WebSocket } from "ws";
 import { DashboardServer } from "../../src/dashboard/server.js";
 import { WardenDatabase } from "../../src/audit/db.js";
 
-const MCP_DIR = path.join(os.homedir(), ".mcp-warden");
+const MCP_DIR = path.join(os.homedir(), ".warden");
 const POLICY_PATH = path.join(MCP_DIR, "policy.yaml");
 const CONFIG_PATH = path.join(MCP_DIR, "config.yaml");
 

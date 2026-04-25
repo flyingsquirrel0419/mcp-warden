@@ -1,6 +1,6 @@
 # Security Model
 
-MCP Warden reduces risk at the MCP tool-call boundary. It is a policy and observability layer, not a sandbox.
+Warden CLI reduces risk at the MCP tool-call boundary. It is a policy and observability layer, not a sandbox.
 
 ## Assets
 
@@ -61,7 +61,7 @@ Audit logs are local, but they can still contain sensitive operational metadata.
 
 Recommended handling:
 
-- Restrict access to `~/.mcp-warden`.
+- Restrict access to `~/.warden`.
 - Keep logs local unless explicitly exported.
 - Rotate or purge logs according to your retention needs.
 - Treat `warden.db` as sensitive.

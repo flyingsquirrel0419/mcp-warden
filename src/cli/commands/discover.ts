@@ -60,7 +60,7 @@ export function registerDiscoverCommand(program: Command): void {
               config: serverConfig,
               sourcePath: config.path,
               sourceType: config.type,
-              alreadyWrapped: serverConfig.command === "mcp-warden",
+              alreadyWrapped: serverConfig.command === "warden",
             });
           }
         } catch {
@@ -135,7 +135,7 @@ export function registerDiscoverCommand(program: Command): void {
               : StdioTransport.stringifyTarget(entry.command, entry.args ?? []);
 
             parsed.mcpServers[server.name] = {
-              command: "mcp-warden",
+              command: "warden",
               args: ["proxy", "--target", originalCommand, "--name", server.name],
             };
             wrapped++;

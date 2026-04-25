@@ -21,7 +21,7 @@ vi.mock("node:child_process", () => {
 
 vi.mock("../../src/policy/TrustedSigners.js", () => ({
   TrustedSigners: {
-    getSignersPath: () => "/home/test/.mcp-warden/allowed_signers",
+    getSignersPath: () => "/home/test/.warden/allowed_signers",
   },
 }));
 

@@ -1,13 +1,13 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/🛡️-MCP%20Warden-4A90D9?style=for-the-badge&labelColor=1a1a2e" alt="MCP Warden" />
+<img src="https://img.shields.io/badge/🛡️-MCP%20Warden-4A90D9?style=for-the-badge&labelColor=1a1a2e" alt="Warden CLI" />
 
-# MCP Warden
+# Warden CLI
 
 **The security gateway your MCP setup didn't know it needed.**
 
-[![CI](https://github.com/flyingsquirrel0419/mcp-warden/actions/workflows/ci.yml/badge.svg)](https://github.com/flyingsquirrel0419/mcp-warden/actions/workflows/ci.yml)
-[![npm version](https://img.shields.io/npm/v/mcp-warden?color=cb3837&label=npm)](https://www.npmjs.com/package/mcp-warden)
+[![CI](https://github.com/flyingsquirrel0419/warden-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/flyingsquirrel0419/warden-cli/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/warden-cli?color=cb3837&label=npm)](https://www.npmjs.com/package/warden-cli)
 [![Node](https://img.shields.io/badge/node-%3E%3D20.0.0-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
@@ -30,7 +30,7 @@ When you wire up an MCP server to Claude or Cursor, you're handing it power over
 - **Prompt injection attacks** can trick an AI into misusing a tool.
 - **No audit trail** means you can't reconstruct what happened after the fact.
 
-MCP Warden solves all of this without changing how your AI client works.
+Warden CLI solves all of this without changing how your AI client works.
 
 ---
 
@@ -54,29 +54,29 @@ MCP Warden solves all of this without changing how your AI client works.
 
 ```bash
 # Install globally
-npm install -g mcp-warden
+npm install -g warden-cli
 
 # Step 1: Scan a server before you trust it
-mcp-warden scan --target "npx @some/mcp-server"
+warden scan --target "npx @some/mcp-server"
 
 # Step 2: Auto-discover existing MCP configs
-mcp-warden discover
+warden discover
 
 # Step 3: Open the dashboard to see what's happening
-mcp-warden dashboard
+warden dashboard
 # → http://localhost:4242
 ```
 
 Or jump straight to proxying a specific server:
 
 ```bash
-mcp-warden proxy \
+warden proxy \
   --target "npx @some/mcp-server" \
   --name my-server \
-  --policy ~/.mcp-warden/policy.yaml
+  --policy ~/.warden/policy.yaml
 ```
 
-When the discovered config looks right, run `mcp-warden discover --wrap` to route those servers through Warden.
+When the discovered config looks right, run `warden discover --wrap` to route those servers through Warden.
 
 > **No account. No cloud. No telemetry.** Everything stays on your machine.
 
@@ -89,7 +89,7 @@ When the discovered config looks right, run `mcp-warden discover --wrap` to rout
 │                     Your Machine                         │
 │                                                         │
 │  ┌──────────┐    ┌──────────────┐    ┌───────────────┐  │
-│  │  Claude  │───▶│  MCP Warden  │───▶│  MCP Server   │  │
+│  │  Claude  │───▶│  Warden CLI  │───▶│  MCP Server   │  │
 │  │  Cursor  │    │              │    │  (filesystem,  │  │
 │  │  etc.    │◀───│  ✓ Policy    │◀───│  shell, fetch, │  │
 │  └──────────┘    │  ✓ Security  │    │  etc.)         │  │
@@ -98,7 +98,7 @@ When the discovered config looks right, run `mcp-warden discover --wrap` to rout
 │                        │                                │
 │                  ┌──────────────┐                       │
 │                  │  Dashboard   │  localhost:4242        │
-│                  │  SQLite DB   │  ~/.mcp-warden/       │
+│                  │  SQLite DB   │  ~/.warden/       │
 │                  └──────────────┘                       │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -118,7 +118,7 @@ If a step blocks the call, the client gets a clean MCP error response — not a 
 
 ## 📋 Policy Files
 
-Policy lives in a YAML file at `~/.mcp-warden/policy.yaml`. Here's a complete example:
+Policy lives in a YAML file at `~/.warden/policy.yaml`. Here's a complete example:
 
 ```yaml
 version: 1
@@ -170,7 +170,7 @@ Start with `audit-only` to learn what your servers do, then move to `enforcing` 
 ## 💻 CLI Reference
 
 ```bash
-mcp-warden <command> [options]
+warden <command> [options]
 ```
 
 | Command | What it does |
@@ -193,13 +193,13 @@ mcp-warden <command> [options]
 
 ```bash
 # Show calls to a specific tool
-mcp-warden log --server my-server --tool search --limit 20
+warden log --server my-server --tool search --limit 20
 
 # Show only blocked calls
-mcp-warden log --blocked
+warden log --blocked
 
 # Tail logs in real time
-mcp-warden log --tail
+warden log --tail
 ```
 
 ### Policy Sync from Git
@@ -208,15 +208,15 @@ Keep policy in a shared repo and sync it to any machine:
 
 ```bash
 # Preview what's in a policy repo
-mcp-warden policy sync --repo https://github.com/example/mcp-policies.git --list
+warden policy sync --repo https://github.com/example/mcp-policies.git --list
 
 # Apply a specific policy file
-mcp-warden policy apply \
+warden policy apply \
   --repo https://github.com/example/mcp-policies.git \
   --policy strict.yaml
 
 # Skip signature verification (not recommended for production)
-mcp-warden policy sync --repo <url> --no-verify
+warden policy sync --repo <url> --no-verify
 ```
 
 Policy repos are verified against SSH-signed commits. Add trusted signers with `policy trust-key`.
@@ -226,8 +226,8 @@ Policy repos are verified against SSH-signed commits. Add trusted signers with `
 ## 📊 Dashboard
 
 ```bash
-mcp-warden dashboard        # → http://localhost:4242
-mcp-warden dashboard --port 8080
+warden dashboard        # → http://localhost:4242
+warden dashboard --port 8080
 ```
 
 The dashboard gives you a local UI for exploring audit logs, viewing policy, and checking per-server and per-tool statistics. It reads directly from your local SQLite database — no network requests.
@@ -255,38 +255,38 @@ PUT  /api/config
 ### npm (recommended)
 
 ```bash
-npm install -g mcp-warden
+npm install -g warden-cli
 ```
 
 Or run without installing:
 
 ```bash
-npx mcp-warden --help
+npx warden-cli --help
 ```
 
 ### Homebrew
 
 ```bash
-brew install --formula https://github.com/flyingsquirrel0419/mcp-warden/releases/latest/download/mcp-warden.rb
+brew install --formula https://github.com/flyingsquirrel0419/warden-cli/releases/latest/download/warden-cli.rb
 ```
 
 ### curl installer
 
 ```bash
 # Latest release
-curl -fsSL https://github.com/flyingsquirrel0419/mcp-warden/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/flyingsquirrel0419/warden-cli/releases/latest/download/install.sh | sh
 
 # Specific version
-MCP_WARDEN_VERSION=1.0.0 sh -c "$(curl -fsSL https://github.com/flyingsquirrel0419/mcp-warden/releases/latest/download/install.sh)"
+WARDEN_CLI_VERSION=1.0.0 sh -c "$(curl -fsSL https://github.com/flyingsquirrel0419/warden-cli/releases/latest/download/install.sh)"
 ```
 
 ### Build from source
 
 ```bash
-git clone https://github.com/flyingsquirrel0419/mcp-warden.git
-cd mcp-warden
+git clone https://github.com/flyingsquirrel0419/warden-cli.git
+cd warden-cli
 npm ci && npm run build
-npm link          # makes `mcp-warden` available globally
+npm link          # makes `warden` available globally
 ```
 
 **Requirements:** Node.js `>=20.0.0`, npm.
@@ -295,10 +295,10 @@ npm link          # makes `mcp-warden` available globally
 
 ## 🔒 Security Notes
 
-MCP Warden is a policy and observability layer — not a sandbox. It cannot fully restrict what a running MCP server process can do at the OS level.
+Warden CLI is a policy and observability layer — not a sandbox. It cannot fully restrict what a running MCP server process can do at the OS level.
 
 - Policy enforcement is only as strong as your configured mode (`enforcing` blocks, `audit-only` records).
-- Audit logs are stored locally under `~/.mcp-warden`. Treat `warden.db` as sensitive.
+- Audit logs are stored locally under `~/.warden`. Treat `warden.db` as sensitive.
 - Input masking covers well-known secret patterns — avoid passing secrets to untrusted tools regardless.
 - SSRF and data-leak detectors are **heuristic** — they catch common patterns, not everything.
 - For stronger isolation, combine Warden with OS sandboxing, containers, or restricted API tokens.

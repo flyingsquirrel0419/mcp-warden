@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to MCP Warden will be documented in this file.
+All notable changes to Warden CLI will be documented in this file.
 
 This project follows a simple changelog format inspired by Keep a Changelog.
 
@@ -40,12 +40,12 @@ No unreleased changes.
 - `scripts/install.sh` curl installer and Homebrew formula generation for release assets.
 - Release guide documenting tag format, optional `NPM_TOKEN`, release assets, and install commands.
 - Regression coverage for live proxy security wiring, audit flush behavior, ESM-safe policy sync config parsing, quoted MCP target parsing, and database-backed rate-limit persistence.
-- `TrustedSigners` class for managing `~/.mcp-warden/allowed_signers` file.
+- `TrustedSigners` class for managing `~/.warden/allowed_signers` file.
 - `SignatureVerifier` class for verifying git commit SSH signatures via `git verify-commit`.
 - `PolicySignatureError` error class for signature verification failures.
-- `mcp-warden policy trust-key` CLI command to add trusted signers.
-- `mcp-warden policy list-keys` CLI command to list trusted signers.
-- `--no-verify` flag on `mcp-warden policy sync` to skip signature verification.
+- `warden policy trust-key` CLI command to add trusted signers.
+- `warden policy list-keys` CLI command to list trusted signers.
+- `--no-verify` flag on `warden policy sync` to skip signature verification.
 
 ## 0.1.0
 

@@ -1,6 +1,6 @@
 # Release Guide
 
-MCP Warden releases are created from git tags. Publishing is handled by GitHub Actions; do not publish manually unless the release workflow fails and the failure mode is understood.
+Warden CLI releases are created from git tags. Publishing is handled by GitHub Actions; do not publish manually unless the release workflow fails and the failure mode is understood.
 
 ## Release Channels
 
@@ -9,7 +9,7 @@ Each tag release produces:
 - an npm package publish when `NPM_TOKEN` is configured;
 - a GitHub Release with npm tarball assets;
 - `install.sh` for curl-based installation;
-- `mcp-warden.rb` for Homebrew formula installation;
+- `warden-cli.rb` for Homebrew formula installation;
 - `checksums.txt` with SHA-256 hashes for release assets.
 
 The npm publish step is optional. If `NPM_TOKEN` is not configured in repository secrets, the workflow logs a notice and still publishes the GitHub Release assets.
@@ -18,7 +18,7 @@ The npm publish step is optional. If `NPM_TOKEN` is not configured in repository
 
 | Secret      | Required | Purpose                                     |
 | ----------- | -------- | ------------------------------------------- |
-| `NPM_TOKEN` | No       | Publishes `mcp-warden` to the npm registry. |
+| `NPM_TOKEN` | No       | Publishes `warden-cli` to the npm registry. |
 
 No extra secret is required for GitHub Release assets because the workflow uses the repository `GITHUB_TOKEN`.
 
@@ -61,19 +61,19 @@ git push origin v1.0.0
 After the GitHub Release exists, users can install with any of these:
 
 ```bash
-npm install -g mcp-warden
+npm install -g warden-cli
 ```
 
 ```bash
-brew install --formula https://github.com/flyingsquirrel0419/mcp-warden/releases/latest/download/mcp-warden.rb
+brew install --formula https://github.com/flyingsquirrel0419/warden-cli/releases/latest/download/warden-cli.rb
 ```
 
 ```bash
-curl -fsSL https://github.com/flyingsquirrel0419/mcp-warden/releases/latest/download/install.sh | sh
+curl -fsSL https://github.com/flyingsquirrel0419/warden-cli/releases/latest/download/install.sh | sh
 ```
 
 For a pinned curl install:
 
 ```bash
-MCP_WARDEN_VERSION=1.0.0 sh -c "$(curl -fsSL https://github.com/flyingsquirrel0419/mcp-warden/releases/latest/download/install.sh)"
+WARDEN_CLI_VERSION=1.0.0 sh -c "$(curl -fsSL https://github.com/flyingsquirrel0419/warden-cli/releases/latest/download/install.sh)"
 ```

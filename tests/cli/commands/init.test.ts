@@ -56,11 +56,11 @@ describe("init command", () => {
       { path: cfgPath("config.json"), type: "claude-desktop" as const },
     ]);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "init"]);
+    await makeProgram().parseAsync(["node", "warden", "init"]);
 
     const modified = readCfg("config.json");
     const servers = modified.mcpServers as Record<string, { command: string; args: string[] }>;
-    expect(servers.notion.command).toBe("mcp-warden");
+    expect(servers.notion.command).toBe("warden");
     expect(servers.notion.args).toEqual([
       "proxy",
       "--target",
@@ -68,7 +68,7 @@ describe("init command", () => {
       "--name",
       "notion",
     ]);
-    expect(servers.github.command).toBe("mcp-warden");
+    expect(servers.github.command).toBe("warden");
     expect(servers.github.args).toEqual([
       "proxy",
       "--target",
@@ -93,7 +93,7 @@ describe("init command", () => {
       { path: cfgPath("config.json"), type: "claude-desktop" as const },
     ]);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "init"]);
+    await makeProgram().parseAsync(["node", "warden", "init"]);
 
     const modified = readCfg("config.json");
     const servers = modified.mcpServers as Record<string, { command: string; args: string[] }>;
@@ -111,7 +111,7 @@ describe("init command", () => {
       mcpServers: {
         notion: { command: "npx", args: ["-y", "@notion/server"] },
         warden: {
-          command: "mcp-warden",
+          command: "warden",
           args: ["proxy", "--target", "foo", "--name", "warden"],
         },
       },
@@ -121,12 +121,12 @@ describe("init command", () => {
       { path: cfgPath("config.json"), type: "claude-desktop" as const },
     ]);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "init"]);
+    await makeProgram().parseAsync(["node", "warden", "init"]);
 
     const modified = readCfg("config.json");
     const servers = modified.mcpServers as Record<string, { command: string; args: string[] }>;
-    expect(servers.notion.command).toBe("mcp-warden");
-    expect(servers.warden.command).toBe("mcp-warden");
+    expect(servers.notion.command).toBe("warden");
+    expect(servers.warden.command).toBe("warden");
     expect(servers.warden.args).toEqual(["proxy", "--target", "foo", "--name", "warden"]);
     expect(getOutput()).toContain("Wrapped 1 servers");
   });
@@ -143,7 +143,7 @@ describe("init command", () => {
       { path: cfgPath("config.json"), type: "claude-desktop" as const },
     ]);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "init"]);
+    await makeProgram().parseAsync(["node", "warden", "init"]);
 
     const backup = fs.readFileSync(cfgPath("config.json") + ".backup", "utf-8");
     expect(backup).toBe(originalBackup);
@@ -156,7 +156,7 @@ describe("init command", () => {
       { path: cfgPath("config.json"), type: "claude-desktop" as const },
     ]);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "init"]);
+    await makeProgram().parseAsync(["node", "warden", "init"]);
 
     expect(fs.existsSync(cfgPath("config.json") + ".backup")).toBe(false);
     expect(getOutput()).not.toContain("Wrapped");
@@ -165,7 +165,7 @@ describe("init command", () => {
   it("handles empty config directory (no configs found)", async () => {
     vi.spyOn(ConfigManager, "findMcpConfigs").mockReturnValue([]);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "init"]);
+    await makeProgram().parseAsync(["node", "warden", "init"]);
 
     expect(getOutput()).toContain("No MCP client configurations found.");
     expect(getOutput()).toContain("Supported types: claude-desktop, cursor, mcp-json");

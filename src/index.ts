@@ -14,7 +14,7 @@ export * from "./utils/errors.js";
 export * from "./policy/schema.js";
 
 // CLI only runs when executed directly (not when imported as a library)
-if (process.argv[1]?.endsWith("index.js") && !process.env.MCP_WARDEN_LIBRARY_MODE) {
+if (process.argv[1]?.endsWith("index.js") && !process.env.WARDEN_LIBRARY_MODE) {
   import("./cli/index.js").then(({ createProgram }) => {
     createProgram().parse();
   });

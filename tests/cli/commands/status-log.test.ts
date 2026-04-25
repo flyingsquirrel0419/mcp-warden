@@ -70,7 +70,7 @@ describe("status command", () => {
   }
 
   it("shows message when DB file does not exist", async () => {
-    await makeProgram().parseAsync(["node", "mcp-warden", "status"]);
+    await makeProgram().parseAsync(["node", "warden", "status"]);
 
     const out = collectOutput(stdoutSpy);
     expect(out).toContain("No audit logs found");
@@ -95,7 +95,7 @@ describe("status command", () => {
       },
     ]);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "status"]);
+    await makeProgram().parseAsync(["node", "warden", "status"]);
 
     const out = collectOutput(stdoutSpy);
     expect(out).toContain("notion/search");
@@ -118,7 +118,7 @@ describe("status command", () => {
       },
     ]);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "status"]);
+    await makeProgram().parseAsync(["node", "warden", "status"]);
 
     const out = collectOutput(stdoutSpy);
     expect(out).toContain("BLOCKED");
@@ -128,7 +128,7 @@ describe("status command", () => {
   it("shows message when DB has no entries", async () => {
     seedEntries(dbPath, []);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "status"]);
+    await makeProgram().parseAsync(["node", "warden", "status"]);
 
     expect(collectOutput(stdoutSpy)).toContain("No audit log entries found");
   });
@@ -196,7 +196,7 @@ describe("log command", () => {
   it("filters by server name", async () => {
     seedEntries(dbPath, testEntries);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "log", "--server", "notion"]);
+    await makeProgram().parseAsync(["node", "warden", "log", "--server", "notion"]);
 
     const out = collectOutput(stdoutSpy);
     expect(out).toContain("notion/search");
@@ -208,7 +208,7 @@ describe("log command", () => {
   it("filters by blocked status", async () => {
     seedEntries(dbPath, testEntries);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "log", "--blocked"]);
+    await makeProgram().parseAsync(["node", "warden", "log", "--blocked"]);
 
     const out = collectOutput(stdoutSpy);
     expect(out).toContain("github/create_issue");
@@ -219,7 +219,7 @@ describe("log command", () => {
   it("shows message when no entries match filters", async () => {
     seedEntries(dbPath, testEntries);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "log", "--server", "nonexistent"]);
+    await makeProgram().parseAsync(["node", "warden", "log", "--server", "nonexistent"]);
 
     expect(collectOutput(stdoutSpy)).toContain("No matching log entries found");
   });
@@ -235,7 +235,7 @@ describe("log command", () => {
       },
     ]);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "log"]);
+    await makeProgram().parseAsync(["node", "warden", "log"]);
 
     const out = collectOutput(stdoutSpy);
     expect(out).toMatch(/\[2025-04-24T10:00:00\.000Z\] notion\/search 50ms OK/);
@@ -254,7 +254,7 @@ describe("log command", () => {
       },
     ]);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "log"]);
+    await makeProgram().parseAsync(["node", "warden", "log"]);
 
     const out = collectOutput(stdoutSpy);
     expect(out).toContain("BLOCKED");
@@ -289,7 +289,7 @@ describe("log command", () => {
       },
     ]);
 
-    await makeProgram().parseAsync(["node", "mcp-warden", "log", "--limit", "2"]);
+    await makeProgram().parseAsync(["node", "warden", "log", "--limit", "2"]);
 
     const out = collectOutput(stdoutSpy);
     const lines = out.split("\n").filter((l) => l.trim().startsWith("["));

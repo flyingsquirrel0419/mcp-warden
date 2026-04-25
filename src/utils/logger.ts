@@ -28,7 +28,7 @@ export class Logger {
 
   constructor(config?: LoggerConfig) {
     this.level = config?.level ?? "info";
-    this.filePath = config?.file ?? path.join(os.homedir(), ".mcp-warden", "logs", "warden.log");
+    this.filePath = config?.file ?? path.join(os.homedir(), ".warden", "logs", "warden.log");
     this.maxSize = config?.maxSize ?? 10 * 1024 * 1024; // 10MB
     this.consoleOutput = config?.console ?? false;
     this.component = "";

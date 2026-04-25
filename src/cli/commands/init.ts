@@ -43,7 +43,7 @@ export function registerInitCommand(program: Command): void {
         let wrappedCount = 0;
         for (const [serverName, serverConfig] of Object.entries(parsed.mcpServers)) {
           // Skip if already wrapped
-          if (serverConfig.command === "mcp-warden") {
+          if (serverConfig.command === "warden") {
             continue;
           }
 
@@ -53,7 +53,7 @@ export function registerInitCommand(program: Command): void {
           );
 
           parsed.mcpServers[serverName] = {
-            command: "mcp-warden",
+            command: "warden",
             args: ["proxy", "--target", originalCommand, "--name", serverName],
           };
           wrappedCount++;

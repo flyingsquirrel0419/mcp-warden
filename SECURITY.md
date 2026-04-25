@@ -1,6 +1,6 @@
 # Security Policy
 
-MCP Warden is security-sensitive software. It proxies MCP tool calls, evaluates policy, stores audit logs, and detects risky input or output patterns. Security issues should be handled carefully.
+Warden CLI is security-sensitive software. It proxies MCP tool calls, evaluates policy, stores audit logs, and detects risky input or output patterns. Security issues should be handled carefully.
 
 ## Supported Versions
 
@@ -30,7 +30,7 @@ We aim to acknowledge reports within **3 business days** and issue a fix within 
 
 ## Security Boundaries
 
-MCP Warden is a **policy and observability layer**, not a process sandbox.
+Warden CLI is a **policy and observability layer**, not a process sandbox.
 
 ### What Warden Can Do
 
@@ -57,9 +57,9 @@ For stronger isolation, combine Warden with OS-level controls (namespaces, conta
 ## Handling Sensitive Data
 
 - **Avoid passing secrets to untrusted MCP tools** — Warden masks known patterns, but cannot catch everything.
-- **Treat audit logs as sensitive** — `~/.mcp-warden/warden.db` contains tool arguments and results; restrict access with filesystem permissions.
+- **Treat audit logs as sensitive** — `~/.warden/warden.db` contains tool arguments and results; restrict access with filesystem permissions.
 - **Dashboard is localhost-only** — do not expose it to external networks without authentication and transport security (TLS).
-- **Policy files are security controls** — protect your `~/.mcp-warden/policy.yaml` from unauthorized modification; use policy sync with SSH signature verification for shared environments.
+- **Policy files are security controls** — protect your `~/.warden/policy.yaml` from unauthorized modification; use policy sync with SSH signature verification for shared environments.
 
 ## Maintainer Security Fix Process
 

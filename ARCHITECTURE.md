@@ -1,6 +1,6 @@
 # Architecture
 
-MCP Warden is a TypeScript CLI and local service layer that proxies MCP servers through a policy, audit, and security pipeline.
+Warden CLI is a TypeScript CLI and local service layer that proxies MCP servers through a policy, audit, and security pipeline.
 
 ## High-Level Flow
 
@@ -87,15 +87,15 @@ Incoming call
 
 ## Data Storage
 
-All data is stored locally under `~/.mcp-warden/`:
+All data is stored locally under `~/.warden/`:
 
 | Path | Purpose |
 |---|---|
-| `~/.mcp-warden/config.yaml` | Local Warden configuration |
-| `~/.mcp-warden/policy.yaml` | Default policy file |
-| `~/.mcp-warden/warden.db` | SQLite audit log database |
-| `~/.mcp-warden/logs/` | Structured log files |
-| `~/.mcp-warden/allowed_signers` | Trusted SSH public keys for policy repo verification |
+| `~/.warden/config.yaml` | Local Warden configuration |
+| `~/.warden/policy.yaml` | Default policy file |
+| `~/.warden/warden.db` | SQLite audit log database |
+| `~/.warden/logs/` | Structured log files |
+| `~/.warden/allowed_signers` | Trusted SSH public keys for policy repo verification |
 
 ## Dashboard
 

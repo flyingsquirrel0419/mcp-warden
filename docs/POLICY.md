@@ -1,11 +1,11 @@
 # Policy Guide
 
-Policies define how MCP Warden handles tool calls for each server.
+Policies define how Warden CLI handles tool calls for each server.
 
 Default path:
 
 ```text
-~/.mcp-warden/policy.yaml
+~/.warden/policy.yaml
 ```
 
 ## Minimal Policy

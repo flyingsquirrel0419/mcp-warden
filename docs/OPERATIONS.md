@@ -1,13 +1,13 @@
 # Operations Guide
 
-This guide covers routine local operation for MCP Warden.
+This guide covers routine local operation for Warden CLI.
 
 ## Local Data
 
 Warden stores local state under:
 
 ```text
-~/.mcp-warden/
+~/.warden/
 ```
 
 Important files:
@@ -22,10 +22,10 @@ Important files:
 ## Starting a Proxy
 
 ```bash
-mcp-warden proxy \
+warden proxy \
   --target "npx @some/mcp-server" \
   --name my-server \
-  --policy ~/.mcp-warden/policy.yaml \
+  --policy ~/.warden/policy.yaml \
   --watch-policy
 ```
 
@@ -34,7 +34,7 @@ Use `--watch-policy` when iterating on policy locally. If policy reload fails, t
 ## Dashboard
 
 ```bash
-mcp-warden dashboard --port 4242
+warden dashboard --port 4242
 ```
 
 Default URL:
@@ -48,10 +48,10 @@ Keep the dashboard bound to trusted local environments. It exposes local audit a
 ## Audit Log Review
 
 ```bash
-mcp-warden status
-mcp-warden log --limit 50
-mcp-warden log --blocked
-mcp-warden log --tail
+warden status
+warden log --limit 50
+warden log --blocked
+warden log --tail
 ```
 
 Audit entries include:
@@ -73,8 +73,8 @@ Commands that rewrite MCP client config files create `.backup` files when no bac
 Before large changes, manually back up:
 
 ```bash
-cp ~/.mcp-warden/policy.yaml ~/.mcp-warden/policy.yaml.backup
-cp ~/.mcp-warden/warden.db ~/.mcp-warden/warden.db.backup
+cp ~/.warden/policy.yaml ~/.warden/policy.yaml.backup
+cp ~/.warden/warden.db ~/.warden/warden.db.backup
 ```
 
 ## Troubleshooting
@@ -84,8 +84,8 @@ cp ~/.mcp-warden/warden.db ~/.mcp-warden/warden.db.backup
 Run a proxy first and call at least one tool:
 
 ```bash
-mcp-warden proxy --target "npx @some/mcp-server" --name test
-mcp-warden status
+warden proxy --target "npx @some/mcp-server" --name test
+warden status
 ```
 
 ### Policy does not seem to apply
@@ -94,7 +94,7 @@ Check:
 
 - The proxy was started with the expected `--name`.
 - The policy has a matching key under `servers`.
-- The proxy was started with `--policy` or the file is at `~/.mcp-warden/policy.yaml`.
+- The proxy was started with `--policy` or the file is at `~/.warden/policy.yaml`.
 - The mode is `enforcing` when you expect blocks.
 
 ### Dashboard port is in use
@@ -102,7 +102,7 @@ Check:
 Start on another port:
 
 ```bash
-mcp-warden dashboard --port 4243
+warden dashboard --port 4243
 ```
 
 ### Scan fails
@@ -116,7 +116,7 @@ npx @some/mcp-server
 Then retry:
 
 ```bash
-mcp-warden scan --target "npx @some/mcp-server"
+warden scan --target "npx @some/mcp-server"
 ```
 
 ## Upgrade Checks

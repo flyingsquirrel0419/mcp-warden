@@ -1,20 +1,20 @@
 #!/usr/bin/env sh
 set -eu
 
-REPO="flyingsquirrel0419/mcp-warden"
-PACKAGE_NAME="mcp-warden.tgz"
+REPO="flyingsquirrel0419/warden-cli"
+PACKAGE_NAME="warden-cli.tgz"
 
 if ! command -v curl >/dev/null 2>&1; then
-  echo "mcp-warden installer requires curl." >&2
+  echo "warden installer requires curl." >&2
   exit 1
 fi
 
 if ! command -v npm >/dev/null 2>&1; then
-  echo "mcp-warden installer requires npm and Node.js >= 20." >&2
+  echo "warden installer requires npm and Node.js >= 20." >&2
   exit 1
 fi
 
-VERSION="${MCP_WARDEN_VERSION:-latest}"
+VERSION="${WARDEN_CLI_VERSION:-latest}"
 
 if [ "$VERSION" = "latest" ]; then
   URL="https://github.com/${REPO}/releases/latest/download/${PACKAGE_NAME}"
@@ -23,12 +23,12 @@ else
   URL="https://github.com/${REPO}/releases/download/v${VERSION}/${PACKAGE_NAME}"
 fi
 
-echo "Installing mcp-warden from ${URL}"
+echo "Installing warden from ${URL}"
 npm install -g "${URL}"
 
-if command -v mcp-warden >/dev/null 2>&1; then
-  mcp-warden --version
+if command -v warden >/dev/null 2>&1; then
+  warden --version
 else
-  echo "mcp-warden installed, but the executable was not found on PATH." >&2
+  echo "warden installed, but the executable was not found on PATH." >&2
   exit 1
 fi

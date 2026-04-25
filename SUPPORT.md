@@ -1,6 +1,6 @@
 # Support
 
-MCP Warden is an open source project. Support is best-effort unless a separate support agreement exists.
+Warden CLI is an open source project. Support is best-effort unless a separate support agreement exists.
 
 ## Before Asking for Help
 
@@ -16,7 +16,7 @@ Please check:
 
 Include:
 
-- MCP Warden version or commit.
+- Warden CLI version or commit.
 - Node.js and npm versions.
 - Operating system.
 - Command you ran.

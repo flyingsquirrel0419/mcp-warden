@@ -4,7 +4,7 @@ import { createProgram } from "../../../src/cli/index.js";
 describe("CLI", () => {
   it("creates program with correct name", () => {
     const program = createProgram();
-    expect(program.name()).toBe("mcp-warden");
+    expect(program.name()).toBe("warden");
   });
 
   it("has proxy command", () => {

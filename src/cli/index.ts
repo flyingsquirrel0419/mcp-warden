@@ -12,7 +12,7 @@ import { VERSION } from "../version.js";
 export function createProgram(): Command {
   const program = new Command();
   program
-    .name("mcp-warden")
+    .name("warden")
     .description("Local-first security gateway for MCP servers")
     .version(VERSION);
   registerProxyCommand(program);

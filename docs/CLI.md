@@ -1,9 +1,9 @@
 # CLI Guide
 
-MCP Warden exposes a single CLI binary:
+Warden CLI exposes a single CLI binary:
 
 ```bash
-mcp-warden
+warden
 ```
 
 Build from source before local use:
@@ -21,7 +21,7 @@ npm link
 Start proxying an MCP server through Warden.
 
 ```bash
-mcp-warden proxy --target "npx @some/mcp-server" --name my-server
+warden proxy --target "npx @some/mcp-server" --name my-server
 ```
 
 Options:
@@ -38,8 +38,8 @@ Options:
 Inspect an MCP server's exposed tools and estimate risk.
 
 ```bash
-mcp-warden scan --target "npx @some/mcp-server"
-mcp-warden scan --target "npx @some/mcp-server" --json
+warden scan --target "npx @some/mcp-server"
+warden scan --target "npx @some/mcp-server" --json
 ```
 
 The scan command evaluates tool names and descriptions for common indicators such as network access, filesystem access, mutation, and command execution.
@@ -49,9 +49,9 @@ The scan command evaluates tool names and descriptions for common indicators suc
 Find MCP server configs in known locations.
 
 ```bash
-mcp-warden discover
-mcp-warden discover --json
-mcp-warden discover --wrap
+warden discover
+warden discover --json
+warden discover --wrap
 ```
 
 Known sources:
@@ -60,14 +60,14 @@ Known sources:
 - Cursor `.cursor/mcp.json`
 - Project or parent `.mcp.json`
 
-`--wrap` rewrites discovered server entries to run through `mcp-warden proxy`.
+`--wrap` rewrites discovered server entries to run through `warden proxy`.
 
 ### `init`
 
 Wrap existing MCP client configurations.
 
 ```bash
-mcp-warden init
+warden init
 ```
 
 This command creates a `.backup` file before rewriting a config when no backup exists.
@@ -77,7 +77,7 @@ This command creates a `.backup` file before rewriting a config when no backup e
 Show recent audit log entries.
 
 ```bash
-mcp-warden status
+warden status
 ```
 
 ### `log`
@@ -85,12 +85,12 @@ mcp-warden status
 Query audit logs.
 
 ```bash
-mcp-warden log
-mcp-warden log --server my-server
-mcp-warden log --tool search
-mcp-warden log --blocked
-mcp-warden log --limit 100
-mcp-warden log --tail
+warden log
+warden log --server my-server
+warden log --tool search
+warden log --blocked
+warden log --limit 100
+warden log --tail
 ```
 
 ### `dashboard`
@@ -98,8 +98,8 @@ mcp-warden log --tail
 Start the local dashboard.
 
 ```bash
-mcp-warden dashboard
-mcp-warden dashboard --port 4242
+warden dashboard
+warden dashboard --port 4242
 ```
 
 ### `policy`
@@ -107,9 +107,9 @@ mcp-warden dashboard --port 4242
 Manage synced policy repositories.
 
 ```bash
-mcp-warden policy sync --repo https://github.com/example/policies.git --list
-mcp-warden policy list --repo https://github.com/example/policies.git
-mcp-warden policy apply --repo https://github.com/example/policies.git --policy strict.yaml
+warden policy sync --repo https://github.com/example/policies.git --list
+warden policy list --repo https://github.com/example/policies.git
+warden policy apply --repo https://github.com/example/policies.git --policy strict.yaml
 ```
 
 ## Exit Behavior
@@ -121,25 +121,25 @@ Most commands write user-facing information to stdout and errors to stderr. Comm
 ### Try a server safely
 
 ```bash
-mcp-warden scan --target "npx @some/mcp-server"
-mcp-warden proxy --target "npx @some/mcp-server" --name trial
-mcp-warden log --server trial
+warden scan --target "npx @some/mcp-server"
+warden proxy --target "npx @some/mcp-server" --name trial
+warden log --server trial
 ```
 
 ### Enforce a policy
 
 ```bash
-mcp-warden proxy \
+warden proxy \
   --target "npx @some/mcp-server" \
   --name production-tools \
-  --policy ~/.mcp-warden/policy.yaml \
+  --policy ~/.warden/policy.yaml \
   --watch-policy
 ```
 
 ### Inspect recent activity
 
 ```bash
-mcp-warden status
-mcp-warden log --blocked
-mcp-warden dashboard
+warden status
+warden log --blocked
+warden dashboard
 ```
