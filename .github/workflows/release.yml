@@ -101,6 +101,7 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
+          overwrite_files: true
           files: |
             release/warden-cli-*.tgz
             release/warden-cli.tgz

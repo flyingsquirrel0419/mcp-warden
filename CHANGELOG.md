@@ -34,6 +34,10 @@ No unreleased changes.
 - `PolicySync.syncRepo()` now accepts an options object `{ branch?, verifySignature? }` instead of a plain branch string. Signature verification defaults to enabled.
 - Fast-forward-only check added to `PolicySync` pull path to prevent history rewrite attacks.
 
+### Fixed
+
+- Installed `warden` and `warden-cli` binaries now launch correctly through npm global symlinks.
+
 ### Added
 
 - Tag-based GitHub Actions release workflow for npm, Homebrew formula, and curl installer distribution.
