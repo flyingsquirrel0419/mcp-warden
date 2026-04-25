@@ -1,18 +1,25 @@
-# Contributing
+# Contributing to MCP Warden
 
-Thanks for taking the time to improve MCP Warden. This project is a local-first security gateway for MCP servers, so changes should be small, reviewable, and careful about failure modes.
+First off — thanks for wanting to help. MCP security tooling is early-stage and there's a lot of room to make it genuinely better. Every contribution matters.
 
-## Ground Rules
+## 🧭 Where to Start
 
-- Keep pull requests focused on one concern.
-- Add tests for behavior changes.
-- Prefer explicit security behavior over silent assumptions.
-- Do not weaken policy enforcement, masking, SSRF checks, or data-leak detection without calling it out clearly.
-- Avoid unrelated formatting or refactors in feature and bugfix PRs.
+Not sure what to work on? Here are areas that would have real impact:
 
-## Development Setup
+- **Security detectors** — new prompt-injection patterns, secret formats, data-leak heuristics
+- **Dashboard UX** — better log visualization, filtering, or alerting UI
+- **Policy language** — new rule conditions, actions, or shorthand syntax
+- **MCP client support** — discovery for clients beyond Claude Desktop / Cursor
+- **Documentation** — examples, guides, common policy patterns
+- **Tests** — coverage gaps in edge cases and integration paths
+
+If you have an idea that doesn't fit these categories, open an issue first to discuss it — that saves you time if the direction isn't a fit.
+
+## 🛠️ Development Setup
 
 ```bash
+git clone https://github.com/flyingsquirrel0419/mcp-warden.git
+cd mcp-warden
 npm ci
 npm run build
 npm test
@@ -25,64 +32,79 @@ npm link
 mcp-warden --help
 ```
 
-## Branch Workflow
+## 🌿 Branch Workflow
 
-1. Create a topic branch.
-2. Make the smallest useful change.
+1. Fork and create a topic branch (`fix/ssrf-loopback`, `feat/new-rule-action`, etc.).
+2. Make the smallest useful change — focused PRs get reviewed faster.
 3. Add or update tests.
-4. Run the local checks.
-5. Open a pull request with a clear summary and verification notes.
+4. Run the full local check suite.
+5. Open a pull request with a short description and how you verified the change.
 
-## Local Checks
+## ✅ Local Check Suite
 
-Run these before opening a pull request:
+Run this before every PR — it's what CI runs:
 
 ```bash
-npm run format:check
-npm run lint
-npm test
-npm run build
-npm audit
+npm run format:check   # check formatting
+npm run lint           # TypeScript type check
+npm test               # full test suite
+npm run build          # compile
+npm audit              # dependency vulnerability check
 ```
 
-Use `npm run format` to apply formatting.
+Fix issues with:
 
-## Testing Guidelines
+```bash
+npm run format         # auto-format
+```
 
-- Put unit tests next to the domain folder under `tests/`.
-- Use temporary directories and databases for filesystem or SQLite tests.
-- Keep tests deterministic and avoid network access unless the test is explicitly integration-level.
-- For policy changes, cover `passthrough`, `audit-only`, and `enforcing` behavior where relevant.
-- For security detectors, include clean input, suspicious input, and boundary cases.
+## 🧪 Testing Guidelines
 
-## Pull Request Checklist
+- Tests live in `tests/` mirroring the `src/` folder structure.
+- Use temporary directories and in-memory databases for filesystem and SQLite tests.
+- Tests must be deterministic — no network access unless it's an explicit integration test.
+- For policy changes, cover all three modes: `passthrough`, `audit-only`, `enforcing`.
+- For security detectors, include: clean input ✅, suspicious input ❌, and boundary cases ⚠️.
 
-- [ ] The change has a clear user-facing or maintainer-facing reason.
+## 🔐 Security-Sensitive Changes
+
+Changes touching `src/policy`, `src/proxy`, `src/security`, or `src/audit` need extra care. In your PR description, answer:
+
+- What risk does this change address (or introduce)?
+- What behavior is blocked, warned, or allowed after the change?
+- How is failure handled — fail open or fail closed?
+- Which tests prove the behavior?
+
+For private vulnerability reports, follow [SECURITY.md](SECURITY.md).
+
+## 📝 Commit Style
+
+Short, imperative messages:
+
+```
+Add injection pattern for base64 encoded payloads
+Fix SSRF check missing IPv6 loopback
+Document policy sync signature flow
+```
+
+## PR Checklist
+
+Before requesting review:
+
+- [ ] The change has a clear, user-facing reason.
 - [ ] Tests were added or updated when behavior changed.
 - [ ] `npm run format:check` passes.
 - [ ] `npm run lint` passes.
 - [ ] `npm test` passes.
 - [ ] `npm run build` passes.
-- [ ] `npm audit` reports no known vulnerabilities.
-- [ ] Security implications are described when applicable.
+- [ ] `npm audit` reports no new vulnerabilities.
+- [ ] Security implications are described (for `policy/`, `proxy/`, `security/`, `audit/`).
 
-## Commit Style
+## Ground Rules
 
-Use short, imperative commit messages:
+- Keep pull requests focused on one concern — multi-concern PRs are harder to review and slower to land.
+- Prefer explicit security behavior over silent assumptions.
+- Do not weaken policy enforcement, masking, SSRF checks, or data-leak detection without a clear call-out in the PR.
+- Avoid unrelated formatting or refactors inside feature/bugfix PRs.
 
-```text
-Add policy sync tests
-Fix SSRF URL parsing
-Document dashboard API
-```
-
-## Security-Sensitive Changes
-
-For changes touching `src/policy`, `src/proxy`, `src/security`, or `src/audit`, include:
-
-- What risk the change addresses.
-- What behavior is blocked, warned, or allowed.
-- How failure is handled.
-- Which tests prove the behavior.
-
-Report private vulnerabilities through the process in [SECURITY.md](SECURITY.md).
+Questions? Open an issue or start a discussion — happy to help.
