@@ -94,7 +94,7 @@ jobs:
             echo "::notice::warden-cli@${PACKAGE_VERSION} already exists on npm; skipping npm publish."
             exit 0
           fi
-          npm publish "${PACKAGE_FILE}" --access public --provenance
+          npm publish "./${PACKAGE_FILE}" --access public --provenance
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
